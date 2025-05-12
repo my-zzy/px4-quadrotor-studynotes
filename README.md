@@ -1,9 +1,11 @@
 # px4-quadrotor-studynotes
-px4 gazebo ros2 ubuntu22.04 control
+px4 gazebo ros2 ubuntu22.04
 
 ## Overview
 
 This note records how to launch and control a quadrotor with PX4. 
+
+Fork from https://github.com/Jaeyoung-Lim/px4-offboard. 
 
 ## Prerequisites
 
@@ -25,7 +27,7 @@ git clone https://github.com/my-zzy/px4-quadrotor-studynotes.git
 
 ### Install PX4 msg
 
-The `px4-offboard` example requires `px4_msgs` definitions:
+The `px4-offboard` example requires `px4_msgs` definitions. Remember to source it before you launch this repo. 
 
 ```
 mkdir -p ~/px4_ros_com_ws/src && cd ~/px4_ros_com_ws/src

@@ -50,6 +50,8 @@ class OffboardControl(Node):
 
     def __init__(self):
         super().__init__('minimal_publisher')
+
+        # setup message format
         qos_profile = QoSProfile(
             reliability=QoSReliabilityPolicy.RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT,
             durability=QoSDurabilityPolicy.RMW_QOS_POLICY_DURABILITY_TRANSIENT_LOCAL,
@@ -62,11 +64,16 @@ class OffboardControl(Node):
             '/fmu/out/vehicle_status_v1',
             self.vehicle_status_callback,
             qos_profile)
+        
         self.publisher_offboard_mode = self.create_publisher(OffboardControlMode, '/fmu/in/offboard_control_mode', qos_profile)
         self.publisher_trajectory = self.create_publisher(TrajectorySetpoint, '/fmu/in/trajectory_setpoint', qos_profile)
+
+        # run the callback function at 50Hz
         timer_period = 0.02  # seconds
         self.timer = self.create_timer(timer_period, self.cmdloop_callback)
         self.dt = timer_period
+
+        # parameter to generate the path
         self.declare_parameter('radius', 10.0)
         self.declare_parameter('omega', 5.0)
         self.declare_parameter('altitude', 5.0)
@@ -74,11 +81,12 @@ class OffboardControl(Node):
         self.arming_state = VehicleStatus.ARMING_STATE_DISARMED
         # Note: no parameter callbacks are used to prevent sudden inflight changes of radii and omega 
         # which would result in large discontinuities in setpoints
+        
         self.theta = 0.0
         self.radius = self.get_parameter('radius').value
         self.omega = self.get_parameter('omega').value
         self.altitude = self.get_parameter('altitude').value
- 
+
     def vehicle_status_callback(self, msg):
         # TODO: handle NED->ENU transformation
         print("NAV_STATUS: ", msg.nav_state)
@@ -90,10 +98,13 @@ class OffboardControl(Node):
         # Publish offboard control modes
         offboard_msg = OffboardControlMode()
         offboard_msg.timestamp = int(Clock().now().nanoseconds / 1000)
+        
+        # only control the position
         offboard_msg.position=True
         offboard_msg.velocity=False
         offboard_msg.acceleration=False
         self.publisher_offboard_mode.publish(offboard_msg)
+
         if (self.nav_state == VehicleStatus.NAVIGATION_STATE_OFFBOARD and self.arming_state == VehicleStatus.ARMING_STATE_ARMED):
 
             trajectory_msg = TrajectorySetpoint()
