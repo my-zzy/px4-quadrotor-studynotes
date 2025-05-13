@@ -79,7 +79,7 @@ class OffboardControl(Node):
         self.get_logger().info(f"NAV_STATE: {msg.nav_state}, ARMING_STATE: {msg.arming_state}")
     
 
-    def listener_callback(self, msg: VehicleOdometry):
+    def listener_callback(self, msg:VehicleOdometry):   # msg??
         # Position (ENU)
         self.x, self.y, self.z = msg.position
 
@@ -91,11 +91,7 @@ class OffboardControl(Node):
         print(f"Position -> x: {self.x:.2f}, y: {self.y:.2f}, z: {self.z:.2f}")
         print(f"Orientation -> roll: {self.roll:.2f}, pitch: {self.pitch:.2f}, yaw: {self.yaw:.2f}\n")
 
-    def desire_trajectory(self, t):
-        pass
-    
-    def controller(self, x, y, z, roll, pitch, yaw):
-        pass
+
 
     def cmdloop_callback(self):
         now = int(Clock().now().nanoseconds / 1000)
