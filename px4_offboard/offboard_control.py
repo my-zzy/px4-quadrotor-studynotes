@@ -59,16 +59,23 @@ class OffboardControl(Node):
             depth=1
         )
 
+        # Get vehicle status
         self.status_sub = self.create_subscription(
             VehicleStatus,
             '/fmu/out/vehicle_status_v1',
             self.vehicle_status_callback,
             qos_profile)
         
+        # Important message sent to px4 in offboard control
         self.publisher_offboard_mode = self.create_publisher(OffboardControlMode, '/fmu/in/offboard_control_mode', qos_profile)
         self.publisher_trajectory = self.create_publisher(TrajectorySetpoint, '/fmu/in/trajectory_setpoint', qos_profile)
 
         # run the callback function at 50Hz
+        # PX4 requires that the external controller provides a continuous 2Hz "proof of life" signal, 
+        # by streaming any of the supported MAVLink setpoint messages or the ROS 2 OffboardControlMode message. 
+        # Only need the TrajectorySetpoint once.
+        # PX4 enables offboard control only after receiving the signal for more than a second, and will regain control if the signal stops.
+        # https://docs.px4.io/main/en/flight_modes/offboard.html
         timer_period = 0.02  # seconds
         self.timer = self.create_timer(timer_period, self.cmdloop_callback)
         self.dt = timer_period
@@ -82,6 +89,7 @@ class OffboardControl(Node):
         # Note: no parameter callbacks are used to prevent sudden inflight changes of radii and omega 
         # which would result in large discontinuities in setpoints
         
+        # parameters are given in the .launch.py file
         self.theta = 0.0
         self.radius = self.get_parameter('radius').value
         self.omega = self.get_parameter('omega').value
@@ -96,6 +104,16 @@ class OffboardControl(Node):
 
     def cmdloop_callback(self):
         # Publish offboard control modes
+        # Off-board control mode message contains the following
+        # The fields are ordered in terms of priority
+        # uint64 timestamp		# time since system start (microseconds)
+        # bool position
+        # bool velocity
+        # bool acceleration
+        # bool attitude
+        # bool body_rate
+        # bool thrust_and_torque
+        # bool direct_actuator
         offboard_msg = OffboardControlMode()
         offboard_msg.timestamp = int(Clock().now().nanoseconds / 1000)
         

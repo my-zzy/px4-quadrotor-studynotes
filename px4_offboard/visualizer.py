@@ -50,6 +50,8 @@ from geometry_msgs.msg import PoseStamped, Point
 from nav_msgs.msg import Path
 from visualization_msgs.msg import Marker
 
+# ROS 2 & PX4 Frame Conventions 
+# https://docs.px4.io/main/en/ros2/user_guide.html#ros-2-px4-frame-conventions
 
 def vector2PoseMsg(frame_id, position, attitude):
     pose_msg = PoseStamped()
@@ -124,6 +126,7 @@ class PX4Visualizer(Node):
         # local position ROS2 message
         self.declare_parameter("path_clearing_timeout", -1.0)
 
+        # main loop
         timer_period = 0.05  # seconds
         self.timer = self.create_timer(timer_period, self.cmdloop_callback)
 

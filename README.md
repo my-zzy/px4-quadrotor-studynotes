@@ -130,8 +130,8 @@ In the window you have designated for the `px4-offboard` example:
 
 
 ```
-cd ~/px4-offboard
-source ../px4_ros_com_ws/install/setup.bash
+cd ~/px4-quadrotor-studynotes
+source ../../install/setup.bash
 export ROS_DOMAIN_ID=0
 export PYTHONOPTIMIZE=1
 ros2 topic list
@@ -223,13 +223,13 @@ Now that we verfied the DDS-ROS subscription communication link, we can start th
 
 CTRL-C to stop the topic echo and then:
 
-```
+<!-- ```
 source ../px4_ros_com_ws/install/setup.bash
 source install/setup.bash
 ```
 
 The first source reensures the dependencies are loaded for the demo.
-The second is for the demo itself.
+The second is for the demo itself. -->
 
 Now launch the demo:
 
