@@ -18,6 +18,13 @@ Fork from https://github.com/Jaeyoung-Lim/px4-offboard.
 
 ## Install PX4 Offboard and dependencies
 
+
+## Create workspace
+
+```
+mkdir -p ~/px4_ros_com_ws/src && cd ~/px4_ros_com_ws/src
+```
+
 ### Download px4-offboard (this repo)
 
 ```
@@ -30,7 +37,6 @@ git clone https://github.com/my-zzy/px4-quadrotor-studynotes.git
 The `px4-offboard` example requires `px4_msgs` definitions. Remember to source it before you launch this repo. 
 
 ```
-mkdir -p ~/px4_ros_com_ws/src && cd ~/px4_ros_com_ws/src
 git clone https://github.com/PX4/px4_msgs.git
 ```
 
