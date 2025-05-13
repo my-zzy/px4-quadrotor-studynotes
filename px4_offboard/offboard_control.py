@@ -32,8 +32,8 @@
 #
 ############################################################################
 
-__author__ = "Jaeyoung Lim"
-__contact__ = "jalim@ethz.ch"
+# __author__ = "Jaeyoung Lim"
+# __contact__ = "jalim@ethz.ch"
 
 import rclpy
 import numpy as np
@@ -104,6 +104,7 @@ class OffboardControl(Node):
 
     def cmdloop_callback(self):
         # Publish offboard control modes
+        # https://docs.px4.io/main/en/flight_modes/offboard.html#ros-2-messages
         # Off-board control mode message contains the following
         # The fields are ordered in terms of priority
         # uint64 timestamp		# time since system start (microseconds)
@@ -125,6 +126,8 @@ class OffboardControl(Node):
 
         if (self.nav_state == VehicleStatus.NAVIGATION_STATE_OFFBOARD and self.arming_state == VehicleStatus.ARMING_STATE_ARMED):
 
+            # format of this message
+            # https://docs.px4.io/main/en/msg_docs/TrajectorySetpoint.html#trajectorysetpoint-uorb-message
             trajectory_msg = TrajectorySetpoint()
             trajectory_msg.position[0] = self.radius * np.cos(self.theta)
             trajectory_msg.position[1] = self.radius * np.sin(self.theta)

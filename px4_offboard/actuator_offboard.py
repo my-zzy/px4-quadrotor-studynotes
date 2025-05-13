@@ -47,6 +47,9 @@ class OffboardControl(Node):
         self.arming_state = VehicleStatus.ARMING_STATE_DISARMED
 
         # Actuator motor values (example: hover power)
+        # check "param show MPC_THR_HOVER" under "make px4"
+        # for more details of the model, check PX4-gazebo-models in Tools or github
+        # https://github.com/PX4/PX4-gazebo-models/tree/main/models
         self.hover_thrust = 0.7  # normalized (0.0 - 1.0)
         self.t = 0.0
 
@@ -72,6 +75,7 @@ class OffboardControl(Node):
             actuator_msg.timestamp = now
 
             # Example: all 4 motors set to hover thrust
+            # https://docs.px4.io/main/en/msg_docs/ActuatorMotors.html
             actuator_msg.control = [
                 self.hover_thrust,  # motor 1
                 self.hover_thrust,  # motor 2
