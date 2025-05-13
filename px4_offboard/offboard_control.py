@@ -119,6 +119,7 @@ class OffboardControl(Node):
         offboard_msg.timestamp = int(Clock().now().nanoseconds / 1000)
         
         # only control the position
+        # https://docs.px4.io/main/en/flight_modes/offboard.html#ros-2-messages
         offboard_msg.position=True
         offboard_msg.velocity=False
         offboard_msg.acceleration=False
