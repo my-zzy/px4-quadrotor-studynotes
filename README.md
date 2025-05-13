@@ -96,14 +96,9 @@ If you scroll up in the Gazebo terminal window, you should see logs indicating i
 ```
 INFO  [microdds_client] synchronized with time offset 1680366210257897us
 INFO  [microdds_client] successfully created rt/fmu/out/failsafe_flags data writer, topic id: 79
-INFO  [microdds_client] successfully created rt/fmu/out/sensor_combined data writer, topic id: 162
-INFO  [microdds_client] successfully created rt/fmu/out/timesync_status data writer, topic id: 182
-INFO  [microdds_client] successfully created rt/fmu/out/vehicle_control_mode data writer, topic id: 205
-INFO  [microdds_client] successfully created rt/fmu/out/vehicle_status data writer, topic id: 222
-INFO  [microdds_client] successfully created rt/fmu/out/vehicle_gps_position data writer, topic id: 208
+...
 INFO  [mavlink] mode: Normal, data rate: 4000000 B/s on udp port 18570 remote port 14550
-INFO  [microdds_client] successfully created rt/fmu/out/vehicle_local_position data writer, topic id: 212
-INFO  [microdds_client] successfully created rt/fmu/out/vehicle_odometry data writer, topic id: 217
+...
 ```
 
 ### Start QGround Controller and Take Off
@@ -142,27 +137,10 @@ You should see a list of topics that match the ones sent from Gazebo.:
 ```
 /fmu/in/obstacle_distance
 /fmu/in/offboard_control_mode
-/fmu/in/onboard_computer_status
-/fmu/in/sensor_optical_flow
-/fmu/in/telemetry_status
-/fmu/in/trajectory_setpoint
-/fmu/in/vehicle_attitude_setpoint
-/fmu/in/vehicle_command
-/fmu/in/vehicle_mocap_odometry
-/fmu/in/vehicle_rates_setpoint
-/fmu/in/vehicle_trajectory_bezier
-/fmu/in/vehicle_trajectory_waypoint
-/fmu/in/vehicle_visual_odometry
+...
 /fmu/out/failsafe_flags
 /fmu/out/sensor_combined
-/fmu/out/timesync_status
-/fmu/out/vehicle_attitude
-/fmu/out/vehicle_control_mode
-/fmu/out/vehicle_global_position
-/fmu/out/vehicle_gps_position
-/fmu/out/vehicle_local_position
-/fmu/out/vehicle_odometry
-/fmu/out/vehicle_status
+...
 /parameter_events
 /rosout
 ```
@@ -192,29 +170,7 @@ q:
 - 0.002538114320486784
 - -0.007746106944978237
 - 0.7249085307121277
-velocity_frame: 1
-velocity:
-- -0.007310825865715742
-- -0.032901208847761154
-- 0.010859847068786621
-angular_velocity:
-- -0.0012153536081314087
-- -0.01004723273217678
-- -0.0018821069970726967
-position_variance:
-- 0.12015653401613235
-- 0.1201564222574234
-- 0.11353325098752975
-orientation_variance:
-- 0.00042706530075520277
-- 0.00021347538859117776
-- 0.000316519319312647
-velocity_variance:
-- 0.014987492933869362
-- 0.01498822309076786
-- 0.014155800454318523
-reset_counter: 7
-quality: 0
+...
 ```
 
 *In this case the `-9.922133445739746` value indicates the drone in the gazebo sim is in the air.*
@@ -231,7 +187,7 @@ source install/setup.bash
 The first source reensures the dependencies are loaded for the demo.
 The second is for the demo itself. -->
 
-Now launch the demo:
+#### Launch the Demo
 
 ```
 ros2 launch px4_offboard offboard_position_control.launch.py
@@ -266,3 +222,55 @@ The terminal should show:
 Now head back to QGroundControl and enable offboard control.  Click the current mode "HOLD" in upper left, then in the menu, select "Offboard":
 
 After a 1-2 sec pause, the demo should take control and you should see the 3d indicator in Rviz drawing circles.
+
+
+
+
+
+## Guide and References
+
+### Paper reference
+
+Adaptive Backstepping-Based Trajectory Tracking Control for Quadrotor UAV with Uncertainty Disturbance 
+
+-- Zhiming Chen, Longwu Liu, and Zhouhuai Luo
+
+### Doc Reference
+
+   * Publish & choose offboard control modes https://docs.px4.io/main/en/flight_modes/offboard.html#ros-2-messages
+
+   * trajectorysetpoint message https://docs.px4.io/main/en/msg_docs/TrajectorySetpoint.html
+
+   * Low-level control of each hover's thrust message https://docs.px4.io/main/en/msg_docs/ActuatorMotors.html
+
+   * Low-level control of thrust and torque: VehicleThrustSetpoint & VehicleTorqueSetpoint
+
+   * Details about the drone https://github.com/PX4/PX4-gazebo-models/tree/main/models (Note: Px4 uses relative or normalized value. Mapping force if needed.)
+
+### How to add a Node
+
+1. Create a file new_file.py in px4_offboard folder
+
+2. Add a Node in offboard_position_control.launch.py
+
+```
+Node(
+   package='px4_offboard',
+   namespace='px4_offboard',
+   executable='new_file',  # <-- NEW script name
+   name='control',
+),
+```
+
+3. Edit setup.py
+```
+entry_points={
+        'console_scripts': [
+                'offboard_control = px4_offboard.offboard_control:main',
+                'visualizer = px4_offboard.visualizer:main',
+                'new_file = px4_offboard.new_file:main',  # <-- this is new
+        ],
+    },
+```
+
+4. Build the workspace again
