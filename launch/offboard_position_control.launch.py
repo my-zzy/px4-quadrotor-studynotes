@@ -44,12 +44,12 @@ import os
 def generate_launch_description():
     package_dir = get_package_share_directory('px4_offboard')
     return LaunchDescription([
-        # Node(
-        #     package='px4_offboard',
-        #     namespace='px4_offboard',
-        #     executable='visualizer',
-        #     name='visualizer'
-        # ),
+        Node(
+            package='px4_offboard',
+            namespace='px4_offboard',
+            executable='visualizer',
+            name='visualizer'
+        ),
         # Node(
         #     package='px4_offboard',
         #     namespace='px4_offboard',
@@ -65,11 +65,11 @@ def generate_launch_description():
             # output='screen',
             # parameters=[{'hover_thrust': 0.6}]  # Example parameter if you use one
         ),
-        # Node(
-        #     package='rviz2',
-        #     namespace='',
-        #     executable='rviz2',
-        #     name='rviz2',
-        #     arguments=['-d', [os.path.join(package_dir, 'visualize.rviz')]]
-        # )
+        Node(
+            package='rviz2',
+            namespace='',
+            executable='rviz2',
+            name='rviz2',
+            arguments=['-d', [os.path.join(package_dir, 'visualize.rviz')]]
+        )
     ])

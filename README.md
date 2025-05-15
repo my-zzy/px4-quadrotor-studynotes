@@ -125,7 +125,7 @@ In the window you have designated for the `px4-offboard` example:
 
 
 ```
-cd ~/px4-quadrotor-studynotes
+cd ~/px4_ros_com_ws
 source ../../install/setup.bash
 export ROS_DOMAIN_ID=0
 export PYTHONOPTIMIZE=1

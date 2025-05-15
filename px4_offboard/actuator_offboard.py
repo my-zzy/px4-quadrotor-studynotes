@@ -9,6 +9,9 @@ from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy, QoSDur
 from px4_msgs.msg import OffboardControlMode
 from px4_msgs.msg import ActuatorMotors
 from px4_msgs.msg import VehicleStatus
+from px4_msgs.msg import VehicleOdometry
+
+from scipy.spatial.transform import Rotation as R
 
 
 class OffboardControl(Node):
@@ -27,6 +30,12 @@ class OffboardControl(Node):
             VehicleStatus,
             '/fmu/out/vehicle_status_v1',
             self.vehicle_status_callback,
+            qos_profile)
+        
+        self.imu = self.create_subscription(
+            VehicleOdometry,
+            '/fmu/out/vehicle_odometry',
+            self.listener_callback,
             qos_profile)
 
         self.publisher_offboard_mode = self.create_publisher(
@@ -57,6 +66,25 @@ class OffboardControl(Node):
         self.nav_state = msg.nav_state
         self.arming_state = msg.arming_state
         self.get_logger().info(f"NAV_STATE: {msg.nav_state}, ARMING_STATE: {msg.arming_state}")
+    
+
+    def listener_callback(self, msg: VehicleOdometry):
+        # Position (ENU)
+        self.x, self.y, self.z = msg.position
+
+        # Orientation (quaternion -> euler)
+        q = msg.q  # [w, x, y, z]
+        r = R.from_quat([q[1], q[2], q[3], q[0]])  # scipy uses [x, y, z, w]
+        self.roll, self.pitch, self.yaw = r.as_euler('xyz', degrees=False)
+
+        print(f"Position -> x: {self.x:.2f}, y: {self.y:.2f}, z: {self.z:.2f}")
+        print(f"Orientation -> roll: {self.roll:.2f}, pitch: {self.pitch:.2f}, yaw: {self.yaw:.2f}\n")
+
+    def desire_trajectory(self, t):
+        pass
+    
+    def controller(self, x, y, z, roll, pitch, yaw):
+        pass
 
     def cmdloop_callback(self):
         now = int(Clock().now().nanoseconds / 1000)
@@ -77,14 +105,12 @@ class OffboardControl(Node):
             # Example: all 4 motors set to hover thrust
             # https://docs.px4.io/main/en/msg_docs/ActuatorMotors.html
             actuator_msg.control = [
-                self.hover_thrust,  # motor 1
-                self.hover_thrust,  # motor 2
-                self.hover_thrust,  # motor 3
-                self.hover_thrust,  # motor 4
+                self.hover_thrust1,
+                self.hover_thrust2,
+                self.hover_thrust3,
+                self.hover_thrust4,
                 0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
             ]
-            # actuator_msg.control = 
-            # [hover_thrust, hover_thrust, hover_thrust, hover_thrust] + [float('nan')] * 8
 
             self.publisher_actuators.publish(actuator_msg)
 
