@@ -31,3 +31,19 @@ def pd_controller(pos, pos_dot, att, att_dot, posd, posd_dot, posd_dot2, psid, p
     z_dot2 = 0
     g = 9.8
     U1 = math.sqrt((m*x_dot2)**2+(m*y_dot2)**2+(m*z_dot2+m*g)**2)
+
+    tem = (x_dot2*math.sin(psi)-y_dot2*math.cos(psi))**2/(x_dot2**2+y_dot2**2+(z_dot2+g)**2)
+    phid = math.asin(math.sqrt(tem))
+
+    tem = (z_dot2+g)**2/((x_dot2*math.cos(psi)+y_dot2*math.sin(psi))**2+(z_dot2+g)**2)
+    thetad = math.acos(math.sqrt(tem))
+
+    phi_dot2 = 0
+    theta_dot2 = 0
+    psi_dot2 = 0
+
+    U2 = 0
+    U3 = 0
+    U4 = 0
+
+    return U1, U2, U3, U4
