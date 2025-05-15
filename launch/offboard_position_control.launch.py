@@ -32,8 +32,8 @@
 #
 ############################################################################
 
-__author__ = "Jaeyoung Lim"
-__contact__ = "jalim@ethz.ch"
+# __author__ = "Jaeyoung Lim"
+# __contact__ = "jalim@ethz.ch"
 
 from launch import LaunchDescription
 from launch_ros.actions import Node
@@ -60,7 +60,7 @@ def generate_launch_description():
         Node(
             package='px4_offboard',
             namespace='px4_offboard',
-            executable='actuator_offboard',  # <-- NEW script name
+            executable='offboard_control',  # <-- NEW script name
             name='control',
             # output='screen',
             # parameters=[{'hover_thrust': 0.6}]  # Example parameter if you use one
