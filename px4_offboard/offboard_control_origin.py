@@ -44,9 +44,6 @@ from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy, QoSDur
 from px4_msgs.msg import OffboardControlMode
 from px4_msgs.msg import TrajectorySetpoint
 from px4_msgs.msg import VehicleStatus
-from px4_msgs.msg import VehicleOdometry
-
-from scipy.spatial.transform import Rotation as R
 
 
 class OffboardControl(Node):
@@ -69,18 +66,6 @@ class OffboardControl(Node):
             self.vehicle_status_callback,
             qos_profile)
         
-        self.imu = self.create_subscription(
-            VehicleOdometry,
-            '/fmu/out/vehicle_odometry',
-            self.listener_callback,
-            qos_profile)
-
-        self.publisher_offboard_mode = self.create_publisher(
-            OffboardControlMode,
-            '/fmu/in/offboard_control_mode',
-            qos_profile)
-        
-
         # Important message sent to px4 in offboard control
         self.publisher_offboard_mode = self.create_publisher(OffboardControlMode, '/fmu/in/offboard_control_mode', qos_profile)
         self.publisher_trajectory = self.create_publisher(TrajectorySetpoint, '/fmu/in/trajectory_setpoint', qos_profile)
@@ -116,22 +101,6 @@ class OffboardControl(Node):
         print("  - offboard status: ", VehicleStatus.NAVIGATION_STATE_OFFBOARD)
         self.nav_state = msg.nav_state
         self.arming_state = msg.arming_state
-
-    def listener_callback(self, msg:VehicleOdometry):   # msg??
-        # Position (ENU)
-        self.x, self.y, self.z = msg.position
-
-        # Orientation (quaternion -> euler)
-        q = msg.q  # [w, x, y, z]
-        r = R.from_quat([q[1], q[2], q[3], q[0]])  # scipy uses [x, y, z, w]
-        self.roll, self.pitch, self.yaw = r.as_euler('xyz', degrees=False)
-        self.phi_data.append(self.roll)
-        self.theta_data.append(self.pitch)
-        self.psi_data.append(self.yaw)
-
-        print(f"Position -> x: {self.x:.2f}, y: {self.y:.2f}, z: {self.z:.2f}")
-        print(f"Orientation -> roll: {self.roll:.2f}, pitch: {self.pitch:.2f}, yaw: {self.yaw:.2f}\n")
-
 
     def cmdloop_callback(self):
         # Publish offboard control modes

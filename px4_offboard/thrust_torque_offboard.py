@@ -14,6 +14,8 @@ from px4_msgs.msg import VehicleThrustSetpoint, VehicleTorqueSetpoint
 
 from scipy.spatial.transform import Rotation as R
 
+from controller import hold, circle, pd_controller
+
 
 class OffboardControl(Node):
 
@@ -66,12 +68,19 @@ class OffboardControl(Node):
         self.nav_state = VehicleStatus.NAVIGATION_STATE_MAX
         self.arming_state = VehicleStatus.ARMING_STATE_DISARMED
 
-        # Actuator motor values (example: hover power)
-        # check "param show MPC_THR_HOVER" under "make px4"
-        # for more details of the model, check PX4-gazebo-models in Tools or github
-        # https://github.com/PX4/PX4-gazebo-models/tree/main/models
-        self.hover_thrust = 0.7  # normalized (0.0 - 1.0)
+        # self.hover_thrust = 0.7  # normalized (0.0 - 1.0)
         self.t = 0.0
+
+        self.x_data = []
+        self.y_data = []
+        self.z_data = []
+        self.phi_data = []
+        self.theta_data = []
+        self.psi_data = []
+
+        self.phid_data = []
+        self.thetad_data = []
+        
 
     def vehicle_status_callback(self, msg):
         self.nav_state = msg.nav_state
@@ -82,11 +91,17 @@ class OffboardControl(Node):
     def listener_callback(self, msg:VehicleOdometry):   # msg??
         # Position (ENU)
         self.x, self.y, self.z = msg.position
+        self.x_data.append(self.x)
+        self.y_data.append(self.y)
+        self.z_data.append(self.z)
 
         # Orientation (quaternion -> euler)
         q = msg.q  # [w, x, y, z]
         r = R.from_quat([q[1], q[2], q[3], q[0]])  # scipy uses [x, y, z, w]
         self.roll, self.pitch, self.yaw = r.as_euler('xyz', degrees=False)
+        self.phi_data.append(self.roll)
+        self.theta_data.append(self.pitch)
+        self.psi_data.append(self.yaw)
 
         print(f"Position -> x: {self.x:.2f}, y: {self.y:.2f}, z: {self.z:.2f}")
         print(f"Orientation -> roll: {self.roll:.2f}, pitch: {self.pitch:.2f}, yaw: {self.yaw:.2f}\n")
@@ -103,24 +118,15 @@ class OffboardControl(Node):
         offboard_msg.thrust_and_torque = True
         self.publisher_offboard_mode.publish(offboard_msg)
 
+        phid_old = 0.0  # TODO
+        thetad_old = 0.0
+        pos = [self.x, self.y, self.z]
+
+        U1, U2, U3, U4, phid_old, thetad_old = pd_controller(self.x, self.y, self.z, self.roll, self.pitch, self.yaw, self.t)
+
         # Only send commands if vehicle is armed and in offboard
         if (self.nav_state == VehicleStatus.NAVIGATION_STATE_OFFBOARD and
             self.arming_state == VehicleStatus.ARMING_STATE_ARMED):
-
-            actuator_msg = ActuatorMotors()
-            actuator_msg.timestamp = now
-
-            # Example: all 4 motors set to hover thrust
-            # https://docs.px4.io/main/en/msg_docs/ActuatorMotors.html
-            # actuator_msg.control = [
-            #     self.hover_thrust1,
-            #     self.hover_thrust2,
-            #     self.hover_thrust3,
-            #     self.hover_thrust4,
-            #     0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
-            # ]
-
-            # self.publisher_actuators.publish(actuator_msg)
 
             # --- Thrust ---
             thrust_msg = VehicleThrustSetpoint()
