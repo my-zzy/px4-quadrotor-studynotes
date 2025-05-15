@@ -135,7 +135,7 @@ class OffboardControl(Node):
         print(f"Orientation -> roll: {self.roll:.2f}, pitch: {self.pitch:.2f}, yaw: {self.yaw:.2f}\n")
         self.get_logger().info(f"Position -> x: {self.x:.2f}, y: {self.y:.2f}, z: {self.z:.2f}")
         self.get_logger().info(f"Orientation -> roll: {self.roll:.2f}, pitch: {self.pitch:.2f}, yaw: {self.yaw:.2f}\n")
-        
+
 
     def cmdloop_callback(self):
         # Publish offboard control modes
@@ -165,12 +165,13 @@ class OffboardControl(Node):
             # format of this message
             # https://docs.px4.io/main/en/msg_docs/TrajectorySetpoint.html#trajectorysetpoint-uorb-message
             trajectory_msg = TrajectorySetpoint()
-            # trajectory_msg.position[0] = self.radius * np.cos(self.theta)
-            # trajectory_msg.position[1] = self.radius * np.sin(self.theta)
+            trajectory_msg.position[0] = self.radius * np.cos(self.theta)
+            trajectory_msg.position[1] = self.radius * np.sin(self.theta)
+            trajectory_msg.position[2] = -self.theta
             # trajectory_msg.position[2] = -self.altitude
-            trajectory_msg.position[0] = 0
-            trajectory_msg.position[1] = 0
-            trajectory_msg.position[2] = -5
+            # trajectory_msg.position[0] = 0
+            # trajectory_msg.position[1] = 0
+            # trajectory_msg.position[2] = -5
             self.publisher_trajectory.publish(trajectory_msg)
 
             self.theta = self.theta + self.omega * self.dt
