@@ -1,7 +1,35 @@
 #!/usr/bin/env python
 
 import math
-from para import *
+from px4_offboard.para import *
+
+
+def quaternion_to_euler(x, y, z, w):
+    """
+    Convert a quaternion into roll, pitch, yaw (in radians)
+    Roll  = rotation around x-axis
+    Pitch = rotation around y-axis
+    Yaw   = rotation around z-axis
+    """
+    # Roll (x-axis rotation)
+    sinr_cosp = 2 * (w * x + y * z)
+    cosr_cosp = 1 - 2 * (x * x + y * y)
+    roll = math.atan2(sinr_cosp, cosr_cosp)
+
+    # Pitch (y-axis rotation)
+    sinp = 2 * (w * y - z * x)
+    if abs(sinp) >= 1:
+        pitch = math.copysign(math.pi / 2, sinp)  # use 90 degrees if out of range
+    else:
+        pitch = math.asin(sinp)
+
+    # Yaw (z-axis rotation)
+    siny_cosp = 2 * (w * z + x * y)
+    cosy_cosp = 1 - 2 * (y * y + z * z)
+    yaw = math.atan2(siny_cosp, cosy_cosp)
+
+    return roll, pitch, yaw
+
 
 def hold():
     return 0, 0, -5
@@ -18,7 +46,7 @@ def pd(x, x_dot, xd, xd_dot, xd_dot2, kp, kd):
     return x_dot2
 
 
-def pd_controller(pos, pos_dot, att, att_dot, posd, posd_dot, posd_dot2, psid, psid_dot, psid_dot2, phid_old, thetad_old, m, l, Ixx, Iyy, Izz, dt):
+def pd_controller(pos, pos_dot, att, att_dot, posd, posd_dot, posd_dot2, psid, psid_dot, psid_dot2, phid_old, thetad_old, dt):
     
     x, y, z = pos
     x_dot, y_dot, z_dot = pos_dot

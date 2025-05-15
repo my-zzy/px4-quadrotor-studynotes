@@ -72,6 +72,10 @@ export ROS_DOMAIN_ID=0
 export PYTHONOPTIMIZE=1
 MicroXRCEAgent udp4 -p 8888 ROS_DOMAIN_ID=0
 ```
+Or
+```
+MicroXRCEAgent udp4 -p 8888
+```
 
 ### Start Gazebo
 
@@ -81,6 +85,10 @@ In the terminal you designated for gazebo:
 cd ~/PX4-Autopilot
 export ROS_DOMAIN_ID=0
 export PYTHONOPTIMIZE=1
+make px4_sitl gz_x500
+```
+Or
+```
 make px4_sitl gz_x500
 ```
 
@@ -126,7 +134,7 @@ In the window you have designated for the `px4-offboard` example:
 
 ```
 cd ~/px4_ros_com_ws
-source ../../install/setup.bash
+source install/setup.bash
 export ROS_DOMAIN_ID=0
 export PYTHONOPTIMIZE=1
 ros2 topic list

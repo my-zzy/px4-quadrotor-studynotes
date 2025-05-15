@@ -46,7 +46,8 @@ from px4_msgs.msg import TrajectorySetpoint
 from px4_msgs.msg import VehicleStatus
 from px4_msgs.msg import VehicleOdometry
 
-from scipy.spatial.transform import Rotation as R
+from px4_offboard.controller import quaternion_to_euler
+# from scipy.spatial.transform import Rotation as R
 
 
 class OffboardControl(Node):
@@ -123,15 +124,18 @@ class OffboardControl(Node):
 
         # Orientation (quaternion -> euler)
         q = msg.q  # [w, x, y, z]
-        r = R.from_quat([q[1], q[2], q[3], q[0]])  # scipy uses [x, y, z, w]
-        self.roll, self.pitch, self.yaw = r.as_euler('xyz', degrees=False)
-        self.phi_data.append(self.roll)
-        self.theta_data.append(self.pitch)
-        self.psi_data.append(self.yaw)
+        self.roll, self.pitch, self.yaw = quaternion_to_euler(q[1],q[2],q[3],q[0])
+        # r = R.from_quat([q[1], q[2], q[3], q[0]])  # scipy uses [x, y, z, w]
+        # self.roll, self.pitch, self.yaw = r.as_euler('xyz', degrees=False)
+        # self.phi_data.append(self.roll)
+        # self.theta_data.append(self.pitch)
+        # self.psi_data.append(self.yaw)
 
         print(f"Position -> x: {self.x:.2f}, y: {self.y:.2f}, z: {self.z:.2f}")
         print(f"Orientation -> roll: {self.roll:.2f}, pitch: {self.pitch:.2f}, yaw: {self.yaw:.2f}\n")
-
+        self.get_logger().info(f"Position -> x: {self.x:.2f}, y: {self.y:.2f}, z: {self.z:.2f}")
+        self.get_logger().info(f"Orientation -> roll: {self.roll:.2f}, pitch: {self.pitch:.2f}, yaw: {self.yaw:.2f}\n")
+        
 
     def cmdloop_callback(self):
         # Publish offboard control modes
@@ -161,9 +165,12 @@ class OffboardControl(Node):
             # format of this message
             # https://docs.px4.io/main/en/msg_docs/TrajectorySetpoint.html#trajectorysetpoint-uorb-message
             trajectory_msg = TrajectorySetpoint()
-            trajectory_msg.position[0] = self.radius * np.cos(self.theta)
-            trajectory_msg.position[1] = self.radius * np.sin(self.theta)
-            trajectory_msg.position[2] = -self.altitude
+            # trajectory_msg.position[0] = self.radius * np.cos(self.theta)
+            # trajectory_msg.position[1] = self.radius * np.sin(self.theta)
+            # trajectory_msg.position[2] = -self.altitude
+            trajectory_msg.position[0] = 0
+            trajectory_msg.position[1] = 0
+            trajectory_msg.position[2] = -5
             self.publisher_trajectory.publish(trajectory_msg)
 
             self.theta = self.theta + self.omega * self.dt
