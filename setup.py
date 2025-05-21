@@ -28,7 +28,8 @@ setup(
         'console_scripts': [
                 'offboard_control = px4_offboard.offboard_control:main',
                 'visualizer = px4_offboard.visualizer:main',
-                'actuator_offboard = px4_offboard.actuator_offboard:main',  # <-- this is new
+                'actuator_offboard = px4_offboard.actuator_offboard:main',
+                'thrust_torque_offboard = px4_offboard.thrust_torque_offboard:main',
         ],
     },
 )

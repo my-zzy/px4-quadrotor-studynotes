@@ -50,19 +50,19 @@ def generate_launch_description():
             executable='visualizer',
             name='visualizer'
         ),
-        Node(
-            package='px4_offboard',
-            namespace='px4_offboard',
-            executable='offboard_control',
-            name='control',
-            parameters= [{'radius': 10.0},{'altitude': 5.0},{'omega': 0.5}]
-        ),
         # Node(
         #     package='px4_offboard',
         #     namespace='px4_offboard',
-        #     executable='thrust_torque_offboard',  # <-- NEW script name
+        #     executable='offboard_control',
         #     name='control',
+        #     parameters= [{'radius': 10.0},{'altitude': 5.0},{'omega': 0.5}]
         # ),
+        Node(
+            package='px4_offboard',
+            namespace='px4_offboard',
+            executable='thrust_torque_offboard',  # <-- NEW script name
+            name='control',
+        ),
         Node(
             package='rviz2',
             namespace='',

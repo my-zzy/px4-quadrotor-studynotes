@@ -38,29 +38,45 @@ def circle(t):
     xd = 10*math.sin(0.15*t)
     yd = 10*math.cos(0.15*t)
     zd = 0.2*t
-    return xd, yd, zd
+    psid = 0
+    return xd, yd, zd, psid
 
 
-def pd(x, x_dot, xd, xd_dot, xd_dot2, kp, kd):
-    x_dot2 = - kd*(x_dot-xd_dot) - kp*(x-xd) + xd_dot2
+def pd(x, x_dot, xd, xd_dot, kp, kd):
+    x_dot2 = - kd*(x_dot-xd_dot) - kp*(x-xd)
     return x_dot2
 
 
-def pd_controller(pos, pos_dot, att, att_dot, posd, posd_dot, posd_dot2, psid, psid_dot, psid_dot2, phid_old, thetad_old, dt):
+def pd_controller(pos, att, posd, attd, dt):
     
     x, y, z = pos
-    x_dot, y_dot, z_dot = pos_dot
     phi, theta, psi = att
-    phi_dot, theta_dot, psi_dot = att_dot
     xd, yd, zd = posd
-    xd_dot, yd_dot, zd_dot = posd_dot
-    xd_dot2, yd_dot2, zd_dot2 = posd_dot2
+    phid, thetad, psid = attd
     g = 9.8
 
+    # calculate pos_dot & att_dot
+    x_dot = (pos[0][-1] - pos[0][-2])/dt    # x,y,z
+    y_dot = (pos[1][-1] - pos[1][-2])/dt
+    z_dot = (pos[2][-1] - pos[2][-2])/dt
+
+    phi_dot = (att[0][-1] - att[0][-2])/dt
+    theta_dot = (att[1][-1] - att[1][-2])/dt
+    psi_dot = (att[2][-1] - att[2][-2])/dt
+
+    xd_dot = (xd[-1] - xd[-2])/dt
+    yd_dot = (yd[-1] - yd[-2])/dt
+    zd_dot = (zd[-1] - zd[-2])/dt
+
+    phid_dot = (phid[-1] - phid[-2])/dt
+    thetad_dot = (thetad[-1] - thetad[-2])/dt
+    psid_dot = (psid[-1] - psid[-2])/dt
+
+
     # PD control of position
-    x_dot2 = pd(x, x_dot, xd, xd_dot, xd_dot2, kp1, kd1)
-    y_dot2 = pd(y, y_dot, yd, yd_dot, yd_dot2, kp2, kd2)
-    z_dot2 = pd(z, z_dot, zd, zd_dot, zd_dot2, kp3, kd3)
+    x_dot2 = pd(x, x_dot, xd, xd_dot, kp1, kd1)
+    y_dot2 = pd(y, y_dot, yd, yd_dot, kp2, kd2)
+    z_dot2 = pd(z, z_dot, zd, zd_dot, kp3, kd3)
 
     # Note that U1 may be negative
     if z_dot2+g > 0:
@@ -83,15 +99,15 @@ def pd_controller(pos, pos_dot, att, att_dot, posd, posd_dot, posd_dot2, psid, p
         thetad = -math.acos(math.sqrt(tem))
 
     # Calculate derivative of desired phi & theta from previous
-    phid_dot = (phid - phid_old)/dt
-    thetad_dot = (thetad - thetad_old)/dt
-    phid_dot2 = 0   # TODO
-    thetad_dot2 = 0
+    # phid_dot = (phid - phid_old)/dt
+    # thetad_dot = (thetad - thetad_old)/dt
+    # phid_dot2 = 0
+    # thetad_dot2 = 0
 
     # PD control of attitude
-    phi_dot2 = pd(phi, phi_dot, phid, phid_dot, phid_dot2, kp4, kd4)
-    theta_dot2 = pd(theta, theta_dot, thetad, thetad_dot, thetad_dot2, kp5, kd5)
-    psi_dot2 = pd(psi, psi_dot, psid, psid_dot, psid_dot2, kp6, kd6)
+    phi_dot2 = pd(phi, phi_dot, phid, phid_dot, kp4, kd4)
+    theta_dot2 = pd(theta, theta_dot, thetad, thetad_dot, kp5, kd5)
+    psi_dot2 = pd(psi, psi_dot, psid, psid_dot, kp6, kd6)
 
     # TODO: how to get air friction
     # U2 = phi_dot2 * Ixx + l*k4*phi_dot
@@ -102,7 +118,7 @@ def pd_controller(pos, pos_dot, att, att_dot, posd, posd_dot, posd_dot2, psid, p
     return U1, U2, U3, U4, phid, thetad
 
     # Why we need to return phid & thetad?
-    # To calculate phid_dot(2) & thetad_dot(2)
+    # To calculate phid_dot & thetad_dot
 
 
 def adaptive_controller(x, y, z, roll, pitch, yaw, xd, yd, zd):

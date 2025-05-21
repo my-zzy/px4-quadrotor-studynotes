@@ -63,19 +63,21 @@ class OffboardControl(Node):
             depth=1
         )
 
-        # Get vehicle status
+        # get vehicle status
         self.status_sub = self.create_subscription(
             VehicleStatus,
             '/fmu/out/vehicle_status_v1',
             self.vehicle_status_callback,
             qos_profile)
         
+        # get odometry
         self.imu = self.create_subscription(
             VehicleOdometry,
             '/fmu/out/vehicle_odometry',
             self.listener_callback,
             qos_profile)
 
+        # publish control mode
         self.publisher_offboard_mode = self.create_publisher(
             OffboardControlMode,
             '/fmu/in/offboard_control_mode',
@@ -96,7 +98,7 @@ class OffboardControl(Node):
         self.timer = self.create_timer(timer_period, self.cmdloop_callback)
         self.dt = timer_period
 
-        # parameter to generate the path
+        # get parameter to generate the path
         self.declare_parameter('radius', 10.0)
         self.declare_parameter('omega', 5.0)
         self.declare_parameter('altitude', 5.0)
@@ -131,8 +133,8 @@ class OffboardControl(Node):
         # self.theta_data.append(self.pitch)
         # self.psi_data.append(self.yaw)
 
-        print(f"Position -> x: {self.x:.2f}, y: {self.y:.2f}, z: {self.z:.2f}")
-        print(f"Orientation -> roll: {self.roll:.2f}, pitch: {self.pitch:.2f}, yaw: {self.yaw:.2f}\n")
+        # print(f"Position -> x: {self.x:.2f}, y: {self.y:.2f}, z: {self.z:.2f}")
+        # print(f"Orientation -> roll: {self.roll:.2f}, pitch: {self.pitch:.2f}, yaw: {self.yaw:.2f}\n")
         self.get_logger().info(f"Position -> x: {self.x:.2f}, y: {self.y:.2f}, z: {self.z:.2f}")
         self.get_logger().info(f"Orientation -> roll: {self.roll:.2f}, pitch: {self.pitch:.2f}, yaw: {self.yaw:.2f}\n")
 

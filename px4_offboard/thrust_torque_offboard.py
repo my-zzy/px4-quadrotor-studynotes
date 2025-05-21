@@ -12,9 +12,12 @@ from px4_msgs.msg import VehicleStatus
 from px4_msgs.msg import VehicleOdometry
 from px4_msgs.msg import VehicleThrustSetpoint, VehicleTorqueSetpoint
 
-from scipy.spatial.transform import Rotation as R
+# from scipy.spatial.transform import Rotation as R
+from px4_offboard.controller import quaternion_to_euler
 
-from controller import hold, circle, pd_controller
+from px4_offboard.controller import hold, circle, pd_controller
+
+from collections import deque
 
 
 class OffboardControl(Node):
@@ -71,16 +74,33 @@ class OffboardControl(Node):
         # self.hover_thrust = 0.7  # normalized (0.0 - 1.0)
         self.t = 0.0
 
-        self.x_data = []
-        self.y_data = []
-        self.z_data = []
-        self.phi_data = []
-        self.theta_data = []
-        self.psi_data = []
+        # self.x_data = []
+        # self.y_data = []
+        # self.z_data = []
+        # self.phi_data = []
+        # self.theta_data = []
+        # self.psi_data = []
 
-        self.phid_data = []
-        self.thetad_data = []
+        # self.phid_data = []
+        # self.thetad_data = []
+
+        self.x_data = deque([0.0]*3, maxlen=3)
+        self.y_data = deque([0.0]*3, maxlen=3)
+        self.z_data = deque([0.0]*3, maxlen=3)
+        self.xd_data = deque([0.0]*3, maxlen=3)
+        self.yd_data = deque([0.0]*3, maxlen=3)
+        self.zd_data = deque([0.0]*3, maxlen=3)
+        self.phi_data = deque([0.0]*3, maxlen=3)
+        self.theta_data = deque([0.0]*3, maxlen=3)
+        self.psi_data = deque([0.0]*3, maxlen=3)
+        self.phid_data = deque([0.0]*3, maxlen=3)
+        self.thetad_data = deque([0.0]*3, maxlen=3)
+        self.psid_data = deque([0.0]*3, maxlen=3)
         
+        # self.psid_data.append(0)
+        # self.psid_data.append(0)
+        # self.psid_data.append(0)
+
 
     def vehicle_status_callback(self, msg):
         self.nav_state = msg.nav_state
@@ -97,8 +117,9 @@ class OffboardControl(Node):
 
         # Orientation (quaternion -> euler)
         q = msg.q  # [w, x, y, z]
-        r = R.from_quat([q[1], q[2], q[3], q[0]])  # scipy uses [x, y, z, w]
-        self.roll, self.pitch, self.yaw = r.as_euler('xyz', degrees=False)
+        # r = R.from_quat([q[1], q[2], q[3], q[0]])  # scipy uses [x, y, z, w]
+        # self.roll, self.pitch, self.yaw = r.as_euler('xyz', degrees=False)
+        self.roll, self.pitch, self.yaw = quaternion_to_euler(q[1],q[2],q[3],q[0])
         self.phi_data.append(self.roll)
         self.theta_data.append(self.pitch)
         self.psi_data.append(self.yaw)
@@ -118,31 +139,41 @@ class OffboardControl(Node):
         offboard_msg.thrust_and_torque = True
         self.publisher_offboard_mode.publish(offboard_msg)
 
-        phid_old = 0.0  # TODO
-        thetad_old = 0.0
-        pos = [self.x, self.y, self.z]
-
-        U1, U2, U3, U4, phid_old, thetad_old = pd_controller(self.x, self.y, self.z, self.roll, self.pitch, self.yaw, self.t)
 
         # Only send commands if vehicle is armed and in offboard
         if (self.nav_state == VehicleStatus.NAVIGATION_STATE_OFFBOARD and
             self.arming_state == VehicleStatus.ARMING_STATE_ARMED):
+            xdxd, ydyd, zdzd,ppsid = circle(self.t)
+            self.xd_data.append(xdxd)
+            self.yd_data.append(ydyd)
+            self.zd_data.append(zdzd)
+            self.psid_data.append(ppsid)
+
+            # pd control preparation
+            pos = [self.x_data, self.y_data, self.z_data]
+            att = [self.phi_data, self.theta_data, self.psi_data]
+            posd = [self.xd_data, self.yd_data, self.zd_data]
+            attd = [self.phid_data, self.thetad_data, self.psid_data]
+
+            U1, U2, U3, U4, phid_old, thetad_old = pd_controller(pos, att, posd, attd, self.dt)
+            self.phid_data.append(phid_old)
+            self.thetad_data.append(thetad_old)
 
             # --- Thrust ---
             thrust_msg = VehicleThrustSetpoint()
             thrust_msg.timestamp = now
             thrust_msg.xyz[0] = 0.0  # No lateral thrust
             thrust_msg.xyz[1] = 0.0
-            thrust_msg.xyz[2] = -self.hover_thrust  # Negative Z = upward in NED/body
+            thrust_msg.xyz[2] = -U1  # Negative Z = upward in NED/body
 
             self.thrust_pub.publish(thrust_msg)
 
             # --- Torque ---
             torque_msg = VehicleTorqueSetpoint()
             torque_msg.timestamp = now
-            torque_msg.xyz[0] = 0.0  # Roll torque
-            torque_msg.xyz[1] = 0.0  # Pitch torque
-            torque_msg.xyz[2] = 0.01  # Yaw torque (positive spin)
+            torque_msg.xyz[0] = U2  # Roll torque
+            torque_msg.xyz[1] = U3  # Pitch torque
+            torque_msg.xyz[2] = U4  # Yaw torque (positive spin)
 
             self.torque_pub.publish(torque_msg)
 

@@ -253,7 +253,9 @@ Adaptive Backstepping-Based Trajectory Tracking Control for Quadrotor UAV with U
 
    * Low-level control of thrust and torque: VehicleThrustSetpoint & VehicleTorqueSetpoint
 
-   * Details about the drone https://github.com/PX4/PX4-gazebo-models/tree/main/models (Note: Px4 uses relative or normalized value. Mapping force if needed.)
+   * Details about the drone https://github.com/PX4/PX4-gazebo-models/tree/main/models (Note: Px4 uses relative or normalized value. Mapping if needed.)
+
+   * Frame conventions https://docs.px4.io/main/en/ros2/user_guide.html#ros-2-px4-frame-conventions
 
 ### How to add a Node
 
