@@ -18,6 +18,7 @@ from px4_offboard.controller import quaternion_to_euler
 from px4_offboard.controller import hold, circle, pd_controller
 
 from collections import deque
+import matplotlib.pyplot as plt
 
 
 class OffboardControl(Node):
@@ -101,6 +102,10 @@ class OffboardControl(Node):
         # self.psid_data.append(0)
         # self.psid_data.append(0)
 
+        self.phi_draw = []
+        self.the_draw = []
+        self.psi_draw = []
+
 
     def vehicle_status_callback(self, msg):
         self.nav_state = msg.nav_state
@@ -124,8 +129,8 @@ class OffboardControl(Node):
         self.theta_data.append(self.pitch)
         self.psi_data.append(self.yaw)
 
-        # print(f"Position -> x: {self.x:.2f}, y: {self.y:.2f}, z: {self.z:.2f}")
-        # print(f"Orientation -> roll: {self.roll:.2f}, pitch: {self.pitch:.2f}, yaw: {self.yaw:.2f}\n")
+        # self.get_logger().info(f"Position -> x: {self.x:.2f}, y: {self.y:.2f}, z: {self.z:.2f}")
+        # self.get_logger().info(f"Orientation -> roll: {self.roll:.2f}, pitch: {self.pitch:.2f}, yaw: {self.yaw:.2f}\n")
 
 
 
@@ -143,7 +148,8 @@ class OffboardControl(Node):
         # Only send commands if vehicle is armed and in offboard
         if (self.nav_state == VehicleStatus.NAVIGATION_STATE_OFFBOARD and
             self.arming_state == VehicleStatus.ARMING_STATE_ARMED):
-            xdxd, ydyd, zdzd,ppsid = circle(self.t)
+            # xdxd, ydyd, zdzd, ppsid = circle(self.t)
+            xdxd, ydyd, zdzd, ppsid = hold()
             self.xd_data.append(xdxd)
             self.yd_data.append(ydyd)
             self.zd_data.append(zdzd)
@@ -155,6 +161,10 @@ class OffboardControl(Node):
             posd = [self.xd_data, self.yd_data, self.zd_data]
             attd = [self.phid_data, self.thetad_data, self.psid_data]
 
+            self.phi_draw.append(self.phi_data[-1])
+            self.the_draw.append(self.theta_data[-1])
+            self.psi_draw.append(self.psi_data[-1])
+
             U1, U2, U3, U4, phid_old, thetad_old = pd_controller(pos, att, posd, attd, self.dt)
             self.phid_data.append(phid_old)
             self.thetad_data.append(thetad_old)
@@ -164,7 +174,7 @@ class OffboardControl(Node):
             thrust_msg.timestamp = now
             thrust_msg.xyz[0] = 0.0  # No lateral thrust
             thrust_msg.xyz[1] = 0.0
-            thrust_msg.xyz[2] = -U1  # Negative Z = upward in NED/body
+            thrust_msg.xyz[2] = U1  # Negative Z = upward in NED/body
 
             self.thrust_pub.publish(thrust_msg)
 
@@ -181,6 +191,24 @@ class OffboardControl(Node):
 
 
             self.t += self.dt
+
+            # draw curve
+            if self.t >= 20*self.dt:
+                # Example: plot x, y, z position over time
+                plt.subplot(3, 1, 1)
+                plt.plot(list(range(len(self.phi_draw))), self.phi_draw)
+                plt.title('Roll over time')
+                plt.subplot(3, 1, 2)
+                plt.plot(list(range(len(self.the_draw))), self.the_draw)
+                plt.title('Pitch over time')
+                plt.subplot(3, 1, 3)
+                plt.plot(list(range(len(self.psi_draw))), self.psi_draw)
+                plt.title('Yaw over time')
+                plt.tight_layout()
+                plt.show()
+
+                # Stop the node and shutdown ROS
+                rclpy.shutdown()
 
 
 def main(args=None):

@@ -32,7 +32,7 @@ def quaternion_to_euler(x, y, z, w):
 
 
 def hold():
-    return 0, 0, -5
+    return 0, 0, -2, 1.78
 
 def circle(t):
     xd = 10*math.sin(0.15*t)
@@ -74,9 +74,12 @@ def pd_controller(pos, att, posd, attd, dt):
 
 
     # PD control of position
-    x_dot2 = pd(x, x_dot, xd, xd_dot, kp1, kd1)
-    y_dot2 = pd(y, y_dot, yd, yd_dot, kp2, kd2)
-    z_dot2 = pd(z, z_dot, zd, zd_dot, kp3, kd3)
+    # x_dot2 = pd(x, x_dot, xd, xd_dot, kp1, kd1)
+    # y_dot2 = pd(y, y_dot, yd, yd_dot, kp2, kd2)
+    # z_dot2 = pd(z, z_dot, zd, zd_dot, kp3, kd3)
+    x_dot2 = pd(x[-1], x_dot, xd[-1], xd_dot, kp1, kd1)
+    y_dot2 = pd(y[-1], y_dot, yd[-1], yd_dot, kp2, kd2)
+    z_dot2 = pd(z[-1], z_dot, zd[-1], zd_dot, kp3, kd3)
 
     # Note that U1 may be negative
     if z_dot2+g > 0:
@@ -85,6 +88,8 @@ def pd_controller(pos, att, posd, attd, dt):
         U1 = -math.sqrt((m*x_dot2)**2+(m*y_dot2)**2+(m*z_dot2+m*g)**2)
 
     # Calculate desired phi & theta from expected translation acceleration
+    # !! non-standard operation
+    psi = psi[-1]
     tem = (x_dot2*math.sin(psi)-y_dot2*math.cos(psi))**2/(x_dot2**2+y_dot2**2+(z_dot2+g)**2)
     if x_dot2*math.sin(psi)-y_dot2*math.cos(psi) > 0:
         phid = math.asin(math.sqrt(tem))
@@ -93,7 +98,7 @@ def pd_controller(pos, att, posd, attd, dt):
 
     tem = (z_dot2+g)**2/((x_dot2*math.cos(psi)+y_dot2*math.sin(psi))**2+(z_dot2+g)**2)
     # if x_dot2*math.cos(psi)+y_dot2*math.sin(psi) > 0:
-    if m*x_dot2/U1 - math.sin(phid)*math.sin(psid) > 0:
+    if m*x_dot2/U1 - math.sin(phid)*math.sin(psid[-1]) > 0:
         thetad = math.acos(math.sqrt(tem))
     else:
         thetad = -math.acos(math.sqrt(tem))
@@ -105,9 +110,9 @@ def pd_controller(pos, att, posd, attd, dt):
     # thetad_dot2 = 0
 
     # PD control of attitude
-    phi_dot2 = pd(phi, phi_dot, phid, phid_dot, kp4, kd4)
-    theta_dot2 = pd(theta, theta_dot, thetad, thetad_dot, kp5, kd5)
-    psi_dot2 = pd(psi, psi_dot, psid, psid_dot, kp6, kd6)
+    phi_dot2 = pd(phi[-1], phi_dot, phid, phid_dot, kp4, kd4)
+    theta_dot2 = pd(theta[-1], theta_dot, thetad, thetad_dot, kp5, kd5)
+    psi_dot2 = pd(psi, psi_dot, psid[-1], psid_dot, kp6, kd6)
 
     # TODO: how to get air friction
     # U2 = phi_dot2 * Ixx + l*k4*phi_dot
@@ -115,7 +120,7 @@ def pd_controller(pos, att, posd, attd, dt):
     U3 = theta_dot2 * Iyy
     U4 = psi_dot2 * Izz
 
-    return U1, U2, U3, U4, phid, thetad
+    return U1, -U2, U3, U4, phid, thetad
 
     # Why we need to return phid & thetad?
     # To calculate phid_dot & thetad_dot
