@@ -198,6 +198,7 @@ The second is for the demo itself. -->
 #### Launch the Demo
 
 ```
+source install/setup.bash
 ros2 launch px4_offboard offboard_position_control.launch.py
 ```
 
