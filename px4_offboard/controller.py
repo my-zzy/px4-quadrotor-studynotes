@@ -126,5 +126,66 @@ def pd_controller(pos, att, posd, attd, dt):
     # To calculate phid_dot & thetad_dot
 
 
-def adaptive_controller(x, y, z, roll, pitch, yaw, xd, yd, zd):
-    pass
+def adaptive_controller(pos, att, posd, attd, dhat, dt):
+    x = pos[0][-1]
+    y = pos[1][-1]
+    z = pos[2][-1]
+    phi = att[0][-1]
+    theta = att[1][-1]
+    psi = att[2][-1]
+
+    xd = posd[0][-1]
+    yd = posd[1][-1]
+    zd = posd[2][-1]
+    phid = attd[0][-1]
+    thetad = attd[1][-1]
+    psid = attd[2][-1]
+
+    dx_hat, dy_hat, dz_hat = dhat
+    g = 9.8
+
+    # calculate pos_dot & att_dot
+    u = (pos[0][-1] - pos[0][-2])/dt    # x,y,z
+    v = (pos[1][-1] - pos[1][-2])/dt
+    w = (pos[2][-1] - pos[2][-2])/dt
+
+    phi_dot = (att[0][-1] - att[0][-2])/dt
+    theta_dot = (att[1][-1] - att[1][-2])/dt
+    psi_dot = (att[2][-1] - att[2][-2])/dt
+
+    xd_dot = (posd[0][-1] - posd[0][-2])/dt
+    yd_dot = (posd[1][-1] - posd[1][-2])/dt
+    zd_dot = (posd[2][-1] - posd[2][-2])/dt
+
+    xd_dot2 = ((posd[0][-1] - posd[0][-2])/dt - (posd[0][-2] - posd[0][-3])/dt)/dt
+    yd_dot2 = ((posd[1][-1] - posd[1][-2])/dt - (posd[1][-2] - posd[1][-3])/dt)/dt
+    zd_dot2 = ((posd[2][-1] - posd[2][-2])/dt - (posd[2][-2] - posd[2][-3])/dt)/dt
+
+    phid_dot = (attd[0][-1] - attd[0][-2])/dt
+    thetad_dot = (attd[1][-1] - attd[1][-2])/dt
+    psid_dot = (attd[2][-1] - attd[2][-2])/dt
+
+    # position control
+    ez = z - zd
+    ew = w - zd_dot + cz*ez
+    ez_dot = ew - cz*ez
+    w_dot = -cw*ew - ez + zd_dot2 - cz*ez_dot
+    dz_hat_dot = lamz*ew
+    U1 = (w_dot - dz_hat +g)*m/(math.cos(phi)*math.cos(theta))
+
+    ex = x - xd
+    eu = u - xd_dot + cu*eu
+    ex_dot = eu - cx*ex
+    u_dot = -cu*eu - ex + xd_dot2 - cx*ex_dot
+    dx_hat_dot = lamx*eu
+    Ux = (u_dot - dx_hat +g)*m/U1
+
+    ey = y - yd
+    ev = v - yd_dot + cv*ey
+    ey_dot = ev - cy*ey
+    v_dot = -cv*ev - ey + yd_dot2 - cy*ey_dot
+    dy_hat_dot = lamy*ev
+    Uy = (v_dot - dy_hat)*m/U1
+
+
+    return U1, dz_hat_dot
