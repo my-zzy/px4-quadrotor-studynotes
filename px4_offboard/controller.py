@@ -38,7 +38,7 @@ def circle(t):
     xd = 10*math.sin(0.15*t)
     yd = 10*math.cos(0.15*t)
     zd = 0.2*t
-    psid = 0
+    psid = 1.78
     return xd, yd, zd, psid
 
 
@@ -98,7 +98,7 @@ def pd_controller(pos, att, posd, attd, dt):
 
     tem = (z_dot2+g)**2/((x_dot2*math.cos(psi)+y_dot2*math.sin(psi))**2+(z_dot2+g)**2)
     # if x_dot2*math.cos(psi)+y_dot2*math.sin(psi) > 0:
-    if m*x_dot2/U1 - math.sin(phid)*math.sin(psid[-1]) > 0:
+    if m*x_dot2/U1 - math.sin(phi[-1])*math.sin(psi) > 0:
         thetad = math.acos(math.sqrt(tem))
     else:
         thetad = -math.acos(math.sqrt(tem))
@@ -120,7 +120,7 @@ def pd_controller(pos, att, posd, attd, dt):
     U3 = theta_dot2 * Iyy
     U4 = psi_dot2 * Izz
 
-    return U1, -U2, U3, U4, phid, thetad
+    return U1, U2, U3, U4, phid, thetad
 
     # Why we need to return phid & thetad?
     # To calculate phid_dot & thetad_dot

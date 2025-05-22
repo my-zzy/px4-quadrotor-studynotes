@@ -10,11 +10,12 @@ Fork from https://github.com/Jaeyoung-Lim/px4-offboard.
 ## Prerequisites
 
    * Ubuntu 22.04
-   * PX4-Autopilot (main branch at 2025.05) https://docs.px4.io/main/en/ros2/user_guide.html
+   * PX4-Autopilot (I cloned main branch in 2025.05) https://docs.px4.io/main/en/ros2/user_guide.html
    * ROS2 Humble (gazebo sim 8 automatically installed with ros2)**(put source /opt/ros/humble/setup.bash into ~/.bashrc)**
    * Micro XRCE-DDS Agent & Client
    * QGroundControl https://docs.px4.io/main/en/dev_setup/dev_env_linux_ubuntu.html
-   * Python 3.10
+   * Python 3.10(or other suitable version)
+
 
 ## Install PX4 Offboard and dependencies
 
