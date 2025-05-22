@@ -253,11 +253,56 @@ Adaptive Backstepping-Based Trajectory Tracking Control for Quadrotor UAV with U
 
    * Low-level control of each hover's thrust message https://docs.px4.io/main/en/msg_docs/ActuatorMotors.html
 
-   * Low-level control of thrust and torque: VehicleThrustSetpoint & VehicleTorqueSetpoint
+   * Low-level control of thrust and torque: VehicleThrustSetpoint & VehicleTorqueSetpoint https://docs.px4.io/main/en/msg_docs/VehicleThrustSetpoint.html#vehiclethrustsetpoint-uorb-message
 
    * Details about the drone https://github.com/PX4/PX4-gazebo-models/tree/main/models (Note: Px4 uses relative or normalized value. Mapping if needed.)
 
    * Frame conventions https://docs.px4.io/main/en/ros2/user_guide.html#ros-2-px4-frame-conventions
+
+```
+    <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+      <jointName>rotor_0_joint</jointName>
+      <linkName>rotor_0</linkName>
+      <turningDirection>ccw</turningDirection>
+      <timeConstantUp>0.0125</timeConstantUp>
+      <timeConstantDown>0.025</timeConstantDown>
+      <maxRotVelocity>1000.0</maxRotVelocity>
+      <motorConstant>8.54858e-06</motorConstant>
+      <momentConstant>0.016</momentConstant>
+      <commandSubTopic>command/motor_speed</commandSubTopic>
+      <motorNumber>0</motorNumber>
+      <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+      <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+      <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+      <motorType>velocity</motorType>
+    </plugin>
+```
+
+```
+      <inertial>
+        <mass>2.0</mass>
+        <inertia>
+          <ixx>0.02166666666666667</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.02166666666666667</iyy>
+          <iyz>0</iyz>
+          <izz>0.04000000000000001</izz>
+        </inertia>
+      </inertial>
+```
+
+```
+      <visual name="5010_motor_base_0">
+        <pose>0.174 0.174 .032 0 0 -.45</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://x500_base/meshes/5010Base.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+```
 
 ### How to add a Node
 

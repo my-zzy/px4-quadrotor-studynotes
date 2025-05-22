@@ -167,13 +167,13 @@ class OffboardControl(Node):
             # format of this message
             # https://docs.px4.io/main/en/msg_docs/TrajectorySetpoint.html#trajectorysetpoint-uorb-message
             trajectory_msg = TrajectorySetpoint()
-            trajectory_msg.position[0] = self.radius * np.cos(self.theta)
-            trajectory_msg.position[1] = self.radius * np.sin(self.theta)
-            trajectory_msg.position[2] = -self.theta
+            # trajectory_msg.position[0] = self.radius * np.cos(self.theta)
+            # trajectory_msg.position[1] = self.radius * np.sin(self.theta)
+            # trajectory_msg.position[2] = -self.theta
             # trajectory_msg.position[2] = -self.altitude
-            # trajectory_msg.position[0] = 0
-            # trajectory_msg.position[1] = 0
-            # trajectory_msg.position[2] = -5
+            trajectory_msg.position[0] = 0
+            trajectory_msg.position[1] = 0
+            trajectory_msg.position[2] = -2
             self.publisher_trajectory.publish(trajectory_msg)
 
             self.theta = self.theta + self.omega * self.dt

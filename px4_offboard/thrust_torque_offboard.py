@@ -20,6 +20,13 @@ from px4_offboard.controller import hold, circle, pd_controller
 from collections import deque
 import matplotlib.pyplot as plt
 
+def mapp(x):
+    if x > 1:
+        return 0.95
+    elif x < -1:
+        return -0.95
+    else:
+        return x
 
 class OffboardControl(Node):
 
@@ -133,7 +140,6 @@ class OffboardControl(Node):
         # self.get_logger().info(f"Orientation -> roll: {self.roll:.2f}, pitch: {self.pitch:.2f}, yaw: {self.yaw:.2f}\n")
 
 
-
     def cmdloop_callback(self):
         now = int(Clock().now().nanoseconds / 1000)
 
@@ -170,20 +176,22 @@ class OffboardControl(Node):
             self.thetad_data.append(thetad_old)
 
             # --- Thrust ---
+            max_thrust = 8.54858*4
             thrust_msg = VehicleThrustSetpoint()
             thrust_msg.timestamp = now
             thrust_msg.xyz[0] = 0.0  # No lateral thrust
             thrust_msg.xyz[1] = 0.0
-            thrust_msg.xyz[2] = U1  # Negative Z = upward in NED/body
+            thrust_msg.xyz[2] = mapp(U1/max_thrust)  # Negative Z = upward in NED/body
 
             self.thrust_pub.publish(thrust_msg)
 
             # --- Torque ---
+            max_torque = 8.54858*0.174*2
             torque_msg = VehicleTorqueSetpoint()
             torque_msg.timestamp = now
-            torque_msg.xyz[0] = U2  # Roll torque
-            torque_msg.xyz[1] = U3  # Pitch torque
-            torque_msg.xyz[2] = U4  # Yaw torque (positive spin)
+            torque_msg.xyz[0] = mapp(U2/max_torque)  # Roll torque
+            torque_msg.xyz[1] = mapp(U3/max_torque)  # Pitch torque
+            torque_msg.xyz[2] = mapp(U4/max_torque)  # Yaw torque (positive spin)
 
             self.torque_pub.publish(torque_msg)
 
@@ -193,7 +201,7 @@ class OffboardControl(Node):
             self.t += self.dt
 
             # draw curve
-            if self.t >= 20*self.dt:
+            if self.t >= 40*self.dt:
                 # Example: plot x, y, z position over time
                 plt.subplot(3, 1, 1)
                 plt.plot(list(range(len(self.phi_draw))), self.phi_draw)

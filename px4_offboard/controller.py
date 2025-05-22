@@ -3,6 +3,8 @@
 import math
 from px4_offboard.para import *
 
+import rclpy.logging
+logger = rclpy.logging.get_logger("controller")
 
 def quaternion_to_euler(x, y, z, w):
     """
@@ -80,6 +82,10 @@ def pd_controller(pos, att, posd, attd, dt):
     x_dot2 = pd(x[-1], x_dot, xd[-1], xd_dot, kp1, kd1)
     y_dot2 = pd(y[-1], y_dot, yd[-1], yd_dot, kp2, kd2)
     z_dot2 = pd(z[-1], z_dot, zd[-1], zd_dot, kp3, kd3)
+    print(1111111)
+    # logger.info(f"{z[-1]}, {z_dot}, {zd[-1]}, {zd_dot}")
+    logger.info(f"z_dot2: {z_dot2}")
+
 
     # Note that U1 may be negative
     if z_dot2+g > 0:

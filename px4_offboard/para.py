@@ -10,13 +10,13 @@ Izz = 0.4
 # pd parameters
 
 kp1 = 6
-kd1 = 5
+kd1 = 0.5
 
 kp2 = 8
-kd2 = 4
+kd2 = 0.4
 
 kp3 = 8
-kd3 = 4
+kd3 = 0.0   # 0.4
 
 # kp4 = 200
 # kd4 = 40
