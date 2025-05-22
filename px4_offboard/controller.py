@@ -37,7 +37,7 @@ def hold():
 def circle(t):
     xd = 10*math.sin(0.15*t)
     yd = 10*math.cos(0.15*t)
-    zd = 0.2*t
+    zd = -0.2*t
     psid = 1.78
     return xd, yd, zd, psid
 
