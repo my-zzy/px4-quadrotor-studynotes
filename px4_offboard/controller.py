@@ -29,12 +29,13 @@ def quaternion_to_euler(x, y, z, w):
     siny_cosp = 2 * (w * z + x * y)
     cosy_cosp = 1 - 2 * (y * y + z * z)
     yaw = math.atan2(siny_cosp, cosy_cosp)
+    # in radians
 
     return roll, pitch, yaw
 
 
 def upstraight(t):
-    return 0, 0, -0.1*t, 1.78
+    return 0.3*t, 0.2*t, -0.9*t, 1.77
 
 def circle(t):
     xd = 10*math.sin(0.15*t)
@@ -79,13 +80,17 @@ def pd_controller(pos, att, posd, attd, dt):
     # x_dot2 = pd(x, x_dot, xd, xd_dot, kp1, kd1)
     # y_dot2 = pd(y, y_dot, yd, yd_dot, kp2, kd2)
     # z_dot2 = pd(z, z_dot, zd, zd_dot, kp3, kd3)
-    x_dot2 = pd(x[-1], x_dot, xd[-1], xd_dot, kp1, kd1)
+    x_dot2 = -pd(x[-1], x_dot, xd[-1], xd_dot, kp1, kd1)
     y_dot2 = pd(y[-1], y_dot, yd[-1], yd_dot, kp2, kd2)
     z_dot2 = pd(z[-1], z_dot, zd[-1], zd_dot, kp3, kd3)
     print(1111111)
     # logger.info(f"{z[-1]}, {z_dot}, {zd[-1]}, {zd_dot}")
-    logger.info(f"z_dot2: {z_dot2}")
+    # logger.info(f"z_dot2: {z_dot2}")
+    # logger.info(f"x_dot2: {x_dot2}")
 
+    # !!for testing only
+    # x_dot2 = 0
+    # y_dot2 = 0
 
     # Note that U1 may be negative
     if z_dot2+g > 0:
@@ -96,6 +101,8 @@ def pd_controller(pos, att, posd, attd, dt):
     # Calculate desired phi & theta from expected translation acceleration
     # !! non-standard operation
     psi = psi[-1]
+    # g = 9.8
+
     tem = (x_dot2*math.sin(psi)-y_dot2*math.cos(psi))**2/(x_dot2**2+y_dot2**2+(z_dot2+g)**2)
     if x_dot2*math.sin(psi)-y_dot2*math.cos(psi) > 0:
         phid = math.asin(math.sqrt(tem))
@@ -126,7 +133,7 @@ def pd_controller(pos, att, posd, attd, dt):
     U3 = theta_dot2 * Iyy
     U4 = psi_dot2 * Izz
 
-    return U1, U2, U3, U4, phid, thetad
+    return U1, U2, U3, U4, phid, thetad, x_dot2, y_dot2
 
     # Why we need to return phid & thetad?
     # To calculate phid_dot & thetad_dot

@@ -21,7 +21,7 @@ Fork from https://github.com/Jaeyoung-Lim/px4-offboard.
 ```
 MicroXRCEAgent udp4 -p 8888
 make px4_sitl gz_x500
-./QGroundControl.AppImage
+./QGroundControl-x86_64.AppImage
 source install/setup.bash
 ros2 launch px4_offboard offboard_position_control.launch.py
 ```

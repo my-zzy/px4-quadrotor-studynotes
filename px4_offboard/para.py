@@ -1,5 +1,5 @@
 # model paras
-m = 2.2
+m = 2.5
 l = 0.25
 
 Ixx = 0.02166
@@ -15,18 +15,18 @@ kd1 = 0.5
 kp2 = 1
 kd2 = 0.4
 
-kp3 = 1.5
+kp3 = 1
 kd3 = 0.04
 
 
-kp4 = 100
-kd4 = 20
+kp4 = 1
+kd4 = 0.1
 
-kp5 = 100
-kd5 = 20
+kp5 = 4
+kd5 = 0.4
 
-kp6 = 100
-kd6 = 20
+kp6 = 4
+kd6 = 0.4
 
 # adaptive paras
 cx = 7

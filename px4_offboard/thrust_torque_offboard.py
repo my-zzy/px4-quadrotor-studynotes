@@ -109,7 +109,12 @@ class OffboardControl(Node):
         # self.psid_data.append(0)
         # self.psid_data.append(0)
 
+        self.x_draw = []
+        self.y_draw = []
         self.z_draw = []
+        self.x_dot2_draw = []
+        self.y_dot2_draw = []
+        self.z_dot2_draw = []
         self.phi_draw = []
         self.the_draw = []
         self.psi_draw = []
@@ -161,7 +166,7 @@ class OffboardControl(Node):
         if (self.nav_state == VehicleStatus.NAVIGATION_STATE_OFFBOARD and
             self.arming_state == VehicleStatus.ARMING_STATE_ARMED):
             # xdxd, ydyd, zdzd, ppsid = circle(self.t)
-            xdxd, ydyd, zdzd, ppsid = upstraight()
+            xdxd, ydyd, zdzd, ppsid = upstraight(self.t)
             self.xd_data.append(xdxd)
             self.yd_data.append(ydyd)
             self.zd_data.append(zdzd)
@@ -173,14 +178,19 @@ class OffboardControl(Node):
             posd = [self.xd_data, self.yd_data, self.zd_data]
             attd = [self.phid_data, self.thetad_data, self.psid_data]
 
+            self.x_draw.append(self.x_data[-1])
+            self.y_draw.append(self.y_data[-1])
             self.z_draw.append(self.z_data[-1])
             self.phi_draw.append(self.phi_data[-1])
             self.the_draw.append(self.theta_data[-1])
             self.psi_draw.append(self.psi_data[-1])
 
-            U1, U2, U3, U4, phid_old, thetad_old = pd_controller(pos, att, posd, attd, self.dt)
+            U1, U2, U3, U4, phid_old, thetad_old, x_dot2, y_dot2 = pd_controller(pos, att, posd, attd, self.dt)
             self.phid_data.append(phid_old)
             self.thetad_data.append(thetad_old)
+
+            self.x_dot2_draw.append(x_dot2)
+            self.y_dot2_draw.append(y_dot2)
 
 
             # --- Thrust ---
@@ -194,7 +204,7 @@ class OffboardControl(Node):
             self.thrust_pub.publish(thrust_msg)
 
             # --- Torque ---
-            max_torque = 8.54858*0.174
+            max_torque = 8.54858*0.174*4
             max_psi_torque = 100000000
             torque_msg = VehicleTorqueSetpoint()
             torque_msg.timestamp = now
@@ -216,27 +226,62 @@ class OffboardControl(Node):
             self.t += self.dt
 
             # draw curve
-            if self.t >= 200*self.dt:
+            test_time = 300
+            if self.t >= test_time*self.dt:
                 # Example: plot x, y, z position over time
+                # plt.figure()
+                # plt.subplot(6, 1, 1)
+                # plt.plot(list(range(len(self.phi_draw))), self.phi_draw)
+                # plt.title('Roll over time')
+                # plt.subplot(6, 1, 2)
+                # plt.plot(list(range(len(self.u2_draw))), self.u2_draw)
+                # plt.title('U2 over time')
+                # plt.subplot(6, 1, 3)
+                # plt.plot(list(range(len(self.the_draw))), self.the_draw)
+                # plt.title('Pitch over time')
+                # plt.subplot(6, 1, 4)
+                # plt.plot(list(range(len(self.u3_draw))), self.u3_draw)
+                # plt.title('U3 over time')
+                # plt.subplot(6, 1, 5)
+                # plt.plot(list(range(len(self.x_draw))), self.x_draw)
+                # plt.plot(x := np.linspace(0, test_time, 10), 0.3*self.dt*x)
+                # plt.title('x over time')
+                # plt.subplot(6, 1, 6)
+                # plt.plot(list(range(len(self.u1_draw))), self.u1_draw)
+                # plt.title('U1 over time')
+
+                # plt.subplot(6, 1, 5)
+                # plt.plot(list(range(len(self.z_draw))), self.z_draw)
+                # plt.plot(x := np.linspace(0, test_time, 10), -0.5*0.02*x)
+                # plt.title('z over time')
+                # plt.subplot(6, 1, 6)
+                # plt.plot(list(range(len(self.u1_draw))), self.u1_draw)
+                # plt.title('U1 over time')
+                # plt.tight_layout()
+
+                plt.figure()
                 plt.subplot(6, 1, 1)
+                plt.plot(list(range(len(self.x_dot2_draw))), self.x_dot2_draw)
+                plt.title('x_dot2 over time')
+                plt.subplot(6, 1, 2)
+                plt.plot(list(range(len(self.y_dot2_draw))), self.y_dot2_draw)
+                plt.title('y_dot2 over time')
+                plt.subplot(6, 1, 3)
                 plt.plot(list(range(len(self.phi_draw))), self.phi_draw)
                 plt.title('Roll over time')
-                plt.subplot(6, 1, 2)
-                plt.plot(list(range(len(self.u2_draw))), self.u2_draw)
-                plt.title('U2 over time')
-                plt.subplot(6, 1, 3)
+                plt.subplot(6, 1, 4)
                 plt.plot(list(range(len(self.the_draw))), self.the_draw)
                 plt.title('Pitch over time')
-                plt.subplot(6, 1, 4)
-                plt.plot(list(range(len(self.u3_draw))), self.u3_draw)
-                plt.title('U3 over time')
                 plt.subplot(6, 1, 5)
-                plt.plot(list(range(len(self.z_draw))), self.z_draw)
-                plt.title('z over time')
+                plt.plot(list(range(len(self.x_draw))), self.x_draw)
+                plt.plot(x := np.linspace(0, test_time, 10), 0.3*self.dt*x)
+                plt.title('x over time')
                 plt.subplot(6, 1, 6)
-                plt.plot(list(range(len(self.u1_draw))), self.u1_draw)
-                plt.title('U1 over time')
-                # plt.tight_layout()
+                plt.plot(list(range(len(self.y_draw))), self.y_draw)
+                plt.plot(x := np.linspace(0, test_time, 10), 0.2*self.dt*x)
+                plt.title('y over time')
+
+
                 plt.show()
 
                 # Stop the node and shutdown ROS
