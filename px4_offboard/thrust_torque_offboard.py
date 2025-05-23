@@ -21,10 +21,10 @@ from collections import deque
 import matplotlib.pyplot as plt
 
 def mapp(x):
-    if x > 1:
-        return 0.95
-    elif x < -1:
-        return -0.95
+    if x > 0.99:
+        return 0.99
+    elif x < -0.99:
+        return -0.99
     else:
         return x
 
@@ -187,15 +187,18 @@ class OffboardControl(Node):
 
             # --- Torque ---
             max_torque = 8.54858*0.174*2
+            max_psi_torque = 100000000
             torque_msg = VehicleTorqueSetpoint()
             torque_msg.timestamp = now
             torque_msg.xyz[0] = mapp(U2/max_torque)  # Roll torque
             torque_msg.xyz[1] = mapp(U3/max_torque)  # Pitch torque
-            torque_msg.xyz[2] = mapp(U4/max_torque)  # Yaw torque (positive spin)
+            torque_msg.xyz[2] = mapp(U4/max_psi_torque)  # Yaw torque (positive spin)
 
             self.torque_pub.publish(torque_msg)
 
             self.get_logger().info(f"Published thrust: {thrust_msg.xyz} | torque: {torque_msg.xyz}")
+            self.get_logger().info(f"xyz: {self.x_data[-1]:.2f}, {self.y_data[-1]:.2f}, {self.z_data[-1]:.2f}")
+            self.get_logger().info(f"phi: {self.phi_data[-1]:.2f}, thet: {self.theta_data[-1]:.2f}, psi: {self.psi_data[-1]:.2f}")
 
 
             self.t += self.dt
