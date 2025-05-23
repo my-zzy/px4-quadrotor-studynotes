@@ -16,6 +16,15 @@ Fork from https://github.com/Jaeyoung-Lim/px4-offboard.
    * QGroundControl https://docs.px4.io/main/en/dev_setup/dev_env_linux_ubuntu.html
    * Python 3.10(or other suitable version)
 
+## Quickstart
+
+```
+MicroXRCEAgent udp4 -p 8888
+make px4_sitl gz_x500
+./QGroundControl.AppImage
+source install/setup.bash
+ros2 launch px4_offboard offboard_position_control.launch.py
+```
 
 ## Install PX4 Offboard and dependencies
 
