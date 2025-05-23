@@ -15,7 +15,7 @@ from px4_msgs.msg import VehicleThrustSetpoint, VehicleTorqueSetpoint
 # from scipy.spatial.transform import Rotation as R
 from px4_offboard.controller import quaternion_to_euler
 
-from px4_offboard.controller import hold, circle, pd_controller
+from px4_offboard.controller import upstraight, circle, pd_controller
 
 from collections import deque
 import matplotlib.pyplot as plt
@@ -109,9 +109,15 @@ class OffboardControl(Node):
         # self.psid_data.append(0)
         # self.psid_data.append(0)
 
+        self.z_draw = []
         self.phi_draw = []
         self.the_draw = []
         self.psi_draw = []
+
+        self.u1_draw = []
+        self.u2_draw = []
+        self.u3_draw = []
+        self.u4_draw = []
 
 
     def vehicle_status_callback(self, msg):
@@ -155,7 +161,7 @@ class OffboardControl(Node):
         if (self.nav_state == VehicleStatus.NAVIGATION_STATE_OFFBOARD and
             self.arming_state == VehicleStatus.ARMING_STATE_ARMED):
             # xdxd, ydyd, zdzd, ppsid = circle(self.t)
-            xdxd, ydyd, zdzd, ppsid = hold()
+            xdxd, ydyd, zdzd, ppsid = upstraight()
             self.xd_data.append(xdxd)
             self.yd_data.append(ydyd)
             self.zd_data.append(zdzd)
@@ -167,6 +173,7 @@ class OffboardControl(Node):
             posd = [self.xd_data, self.yd_data, self.zd_data]
             attd = [self.phid_data, self.thetad_data, self.psid_data]
 
+            self.z_draw.append(self.z_data[-1])
             self.phi_draw.append(self.phi_data[-1])
             self.the_draw.append(self.theta_data[-1])
             self.psi_draw.append(self.psi_data[-1])
@@ -174,6 +181,7 @@ class OffboardControl(Node):
             U1, U2, U3, U4, phid_old, thetad_old = pd_controller(pos, att, posd, attd, self.dt)
             self.phid_data.append(phid_old)
             self.thetad_data.append(thetad_old)
+
 
             # --- Thrust ---
             max_thrust = 8.54858*4
@@ -186,7 +194,7 @@ class OffboardControl(Node):
             self.thrust_pub.publish(thrust_msg)
 
             # --- Torque ---
-            max_torque = 8.54858*0.174*2
+            max_torque = 8.54858*0.174
             max_psi_torque = 100000000
             torque_msg = VehicleTorqueSetpoint()
             torque_msg.timestamp = now
@@ -200,22 +208,35 @@ class OffboardControl(Node):
             self.get_logger().info(f"xyz: {self.x_data[-1]:.2f}, {self.y_data[-1]:.2f}, {self.z_data[-1]:.2f}")
             self.get_logger().info(f"phi: {self.phi_data[-1]:.2f}, thet: {self.theta_data[-1]:.2f}, psi: {self.psi_data[-1]:.2f}")
 
+            self.u1_draw.append(mapp(U1/max_thrust))
+            self.u2_draw.append(mapp(U2/max_torque))
+            self.u3_draw.append(mapp(U3/max_torque))
+            self.u4_draw.append(mapp(U4/max_psi_torque))
 
             self.t += self.dt
 
             # draw curve
-            if self.t >= 40*self.dt:
+            if self.t >= 200*self.dt:
                 # Example: plot x, y, z position over time
-                plt.subplot(3, 1, 1)
+                plt.subplot(6, 1, 1)
                 plt.plot(list(range(len(self.phi_draw))), self.phi_draw)
                 plt.title('Roll over time')
-                plt.subplot(3, 1, 2)
+                plt.subplot(6, 1, 2)
+                plt.plot(list(range(len(self.u2_draw))), self.u2_draw)
+                plt.title('U2 over time')
+                plt.subplot(6, 1, 3)
                 plt.plot(list(range(len(self.the_draw))), self.the_draw)
                 plt.title('Pitch over time')
-                plt.subplot(3, 1, 3)
-                plt.plot(list(range(len(self.psi_draw))), self.psi_draw)
-                plt.title('Yaw over time')
-                plt.tight_layout()
+                plt.subplot(6, 1, 4)
+                plt.plot(list(range(len(self.u3_draw))), self.u3_draw)
+                plt.title('U3 over time')
+                plt.subplot(6, 1, 5)
+                plt.plot(list(range(len(self.z_draw))), self.z_draw)
+                plt.title('z over time')
+                plt.subplot(6, 1, 6)
+                plt.plot(list(range(len(self.u1_draw))), self.u1_draw)
+                plt.title('U1 over time')
+                # plt.tight_layout()
                 plt.show()
 
                 # Stop the node and shutdown ROS

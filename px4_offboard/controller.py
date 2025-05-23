@@ -33,8 +33,8 @@ def quaternion_to_euler(x, y, z, w):
     return roll, pitch, yaw
 
 
-def hold():
-    return 0, 0, -2, 1.78
+def upstraight(t):
+    return 0, 0, -0.1*t, 1.78
 
 def circle(t):
     xd = 10*math.sin(0.15*t)
@@ -55,7 +55,7 @@ def pd_controller(pos, att, posd, attd, dt):
     phi, theta, psi = att
     xd, yd, zd = posd
     phid, thetad, psid = attd
-    g = 9.8
+    g = -9.8    # negative?!
 
     # calculate pos_dot & att_dot
     x_dot = (pos[0][-1] - pos[0][-2])/dt    # x,y,z
