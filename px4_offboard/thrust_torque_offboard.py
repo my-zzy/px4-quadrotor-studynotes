@@ -205,7 +205,7 @@ class OffboardControl(Node):
 
             # --- Torque ---
             max_torque = 8.54858*0.174*4
-            max_psi_torque = 100000000
+            max_psi_torque = 1000
             torque_msg = VehicleTorqueSetpoint()
             torque_msg.timestamp = now
             torque_msg.xyz[0] = mapp(U2/max_torque)  # Roll torque
@@ -226,7 +226,7 @@ class OffboardControl(Node):
             self.t += self.dt
 
             # draw curve
-            test_time = 300
+            test_time = 500
             if self.t >= test_time*self.dt:
                 # Example: plot x, y, z position over time
                 # plt.figure()
@@ -280,6 +280,10 @@ class OffboardControl(Node):
                 plt.plot(list(range(len(self.y_draw))), self.y_draw)
                 plt.plot(x := np.linspace(0, test_time, 10), 0.2*self.dt*x)
                 plt.title('y over time')
+
+                plt.figure()
+                plt.plot(list(range(len(self.psi_draw))), self.psi_draw)
+                plt.title('Yaw over time')
 
 
                 plt.show()

@@ -35,7 +35,12 @@ def quaternion_to_euler(x, y, z, w):
 
 
 def upstraight(t):
-    return 0.3*t, 0.2*t, -0.9*t, 1.77
+    if t < 5:
+        return 0, 0, -t, 1.77
+    elif t < 50:
+        return 0, 0, -t, 0
+    else:
+        return 0.3*(t-5), 0.2*(t-5), -t, 0
 
 def circle(t):
     xd = 10*math.sin(0.15*t)
