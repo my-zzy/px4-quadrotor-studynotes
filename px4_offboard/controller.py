@@ -34,28 +34,12 @@ def quaternion_to_euler(x, y, z, w):
     return roll, pitch, yaw
 
 
-def upstraight(t):
-    if t < 5:
-        return 0, 0, -t, 1.77
-    elif t < 50:
-        return 0, 0, -t, 0
-    else:
-        return 0.3*(t-5), 0.2*(t-5), -t, 0
-
-def circle(t):
-    xd = 10*math.sin(0.15*t)
-    yd = 10*math.cos(0.15*t)
-    zd = -0.2*t
-    psid = 1.78
-    return xd, yd, zd, psid
-
-
 def pd(x, x_dot, xd, xd_dot, kp, kd):
     x_dot2 = - kd*(x_dot-xd_dot) - kp*(x-xd)
     return x_dot2
 
 
-def pd_controller(pos, att, posd, attd, dt):
+def pd_controller(pos, att, posd, attd, dt, t):
     
     x, y, z = pos
     phi, theta, psi = att
@@ -76,16 +60,12 @@ def pd_controller(pos, att, posd, attd, dt):
     yd_dot = (yd[-1] - yd[-2])/dt
     zd_dot = (zd[-1] - zd[-2])/dt
 
-    phid_dot = (phid[-1] - phid[-2])/dt
-    thetad_dot = (thetad[-1] - thetad[-2])/dt
-    psid_dot = (psid[-1] - psid[-2])/dt
-
 
     # PD control of position
     # x_dot2 = pd(x, x_dot, xd, xd_dot, kp1, kd1)
     # y_dot2 = pd(y, y_dot, yd, yd_dot, kp2, kd2)
     # z_dot2 = pd(z, z_dot, zd, zd_dot, kp3, kd3)
-    x_dot2 = -pd(x[-1], x_dot, xd[-1], xd_dot, kp1, kd1)
+    x_dot2 = pd(x[-1], x_dot, xd[-1], xd_dot, kp1, kd1)
     y_dot2 = pd(y[-1], y_dot, yd[-1], yd_dot, kp2, kd2)
     z_dot2 = pd(z[-1], z_dot, zd[-1], zd_dot, kp3, kd3)
     print(1111111)
@@ -94,8 +74,8 @@ def pd_controller(pos, att, posd, attd, dt):
     # logger.info(f"x_dot2: {x_dot2}")
 
     # !!for testing only
-    # x_dot2 = 0
-    # y_dot2 = 0
+    x_dot2 = 0
+    y_dot2 = 0
 
     # Note that U1 may be negative
     if z_dot2+g > 0:
@@ -108,28 +88,39 @@ def pd_controller(pos, att, posd, attd, dt):
     psi = psi[-1]
     # g = 9.8
 
+
     tem = (x_dot2*math.sin(psi)-y_dot2*math.cos(psi))**2/(x_dot2**2+y_dot2**2+(z_dot2+g)**2)
     if x_dot2*math.sin(psi)-y_dot2*math.cos(psi) > 0:
-        phid = math.asin(math.sqrt(tem))
+        phidd = math.asin(math.sqrt(tem))
     else:
-        phid = -math.asin(math.sqrt(tem))
+        phidd = -math.asin(math.sqrt(tem))
 
     tem = (z_dot2+g)**2/((x_dot2*math.cos(psi)+y_dot2*math.sin(psi))**2+(z_dot2+g)**2)
     # if x_dot2*math.cos(psi)+y_dot2*math.sin(psi) > 0:
     if m*x_dot2/U1 - math.sin(phi[-1])*math.sin(psi) > 0:
-        thetad = math.acos(math.sqrt(tem))
+        thetadd = math.acos(math.sqrt(tem))
     else:
-        thetad = -math.acos(math.sqrt(tem))
+        thetadd = -math.acos(math.sqrt(tem))
+
+    # !!for testing only
+    phidd = 0
+    thetadd = 0
+    if t > 2:
+        phidd = 0.2
+        # phidd = 0.1*math.sin(t)
+        # thetadd = 0.2*math.sin(t)
+    
+
 
     # Calculate derivative of desired phi & theta from previous
-    # phid_dot = (phid - phid_old)/dt
-    # thetad_dot = (thetad - thetad_old)/dt
-    # phid_dot2 = 0
-    # thetad_dot2 = 0
+    phid_dot = (phidd - phid[-1])/dt
+    thetad_dot = (thetadd - thetad[-1])/dt
+    psid_dot = (psid[-1] - psid[-2])/dt
+
 
     # PD control of attitude
-    phi_dot2 = pd(phi[-1], phi_dot, phid, phid_dot, kp4, kd4)
-    theta_dot2 = pd(theta[-1], theta_dot, thetad, thetad_dot, kp5, kd5)
+    phi_dot2 = pd(phi[-1], phi_dot, phidd, phid_dot, kp4, kd4)
+    theta_dot2 = pd(theta[-1], theta_dot, thetadd, thetad_dot, kp5, kd5)
     psi_dot2 = pd(psi, psi_dot, psid[-1], psid_dot, kp6, kd6)
 
     # TODO: how to get air friction
@@ -138,7 +129,7 @@ def pd_controller(pos, att, posd, attd, dt):
     U3 = theta_dot2 * Iyy
     U4 = psi_dot2 * Izz
 
-    return U1, U2, U3, U4, phid, thetad, x_dot2, y_dot2
+    return U1, U2, U3, U4, phidd, thetadd, x_dot2, y_dot2
 
     # Why we need to return phid & thetad?
     # To calculate phid_dot & thetad_dot
