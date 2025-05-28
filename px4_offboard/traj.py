@@ -9,9 +9,9 @@ def upstraight(t):
         return 0.3*(t-5), 0.2*(t-5), -t, 0
 
 def circle(t):
-    xd = 0.5*math.sin(0.5*t)
-    yd = 0.5*math.cos(0.5*t)
-    zd = -1*t
+    xd = 2*math.sin(0.5*t)
+    yd = 2*math.cos(0.5*t)
+    zd = -0.2*t
     psid = 1.77
     return xd, yd, zd, psid
 
