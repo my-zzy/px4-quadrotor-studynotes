@@ -30,6 +30,7 @@ setup(
                 'visualizer = px4_offboard.visualizer:main',
                 'actuator_offboard = px4_offboard.actuator_offboard:main',
                 'thrust_torque_offboard = px4_offboard.thrust_torque_offboard:main',
+                'adaptive_offboard = px4_offboard.adaptive_offboard:main',
         ],
     },
 )

@@ -15,7 +15,7 @@ from px4_msgs.msg import VehicleThrustSetpoint, VehicleTorqueSetpoint
 # from scipy.spatial.transform import Rotation as R
 from px4_offboard.controller import quaternion_to_euler
 
-from px4_offboard.controller import pd_controller
+from px4_offboard.controller import adaptive_controller
 from px4_offboard.traj import *
 
 from collections import deque
@@ -82,8 +82,8 @@ class OffboardControl(Node):
 
         self.t = 0.0
 
-        self.dhat = 0
-        self.jifen = 0
+        self.dhat = [0.0]*6     # [dx_hat, dy_hat, dz_hat, dphi_hat, dtheta_hat, dpsi_hat]
+        self.jifen = [0.0]*3    # [xphi, xtheta, xpsi]
 
         self.x_data = deque([0.0]*3, maxlen=3)
         self.y_data = deque([0.0]*3, maxlen=3)
@@ -175,7 +175,7 @@ class OffboardControl(Node):
             self.the_draw.append(self.theta_data[-1])
             self.psi_draw.append(self.psi_data[-1])
 
-            U1, U2, U3, U4, phid_old, thetad_old, dhat_old, jifen_old = pd_controller(pos, att, posd, attd, self.dhat, self.jifen, self.dt)
+            U1, U2, U3, U4, phid_old, thetad_old, dhat_old, jifen_old = adaptive_controller(pos, att, posd, attd, self.dhat, self.jifen, self.dt)
             self.dhat = dhat_old
             self.jifen = jifen_old
             

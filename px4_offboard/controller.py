@@ -190,25 +190,33 @@ def adaptive_controller(pos, att, posd, attd, dhat, jifen, dt):
     dz_hat_dot = lamz*ew
     dz_hat += dz_hat_dot*dt
     U1 = (w_dot - dz_hat +g)*m/(math.cos(phi)*math.cos(theta))
+    logger.info(f"U1: {U1}")
 
     ex = x - xd
-    eu = u - xd_dot + cu*eu
+    eu = u - xd_dot + cu*ex
     ex_dot = eu - cx*ex
     u_dot = -cu*eu - ex + xd_dot2 - cx*ex_dot
+    u_dot = 0   # for testing
     dx_hat_dot = lamx*eu
     dx_hat += dx_hat_dot*dt
     Ux = (u_dot - dx_hat +g)*m/U1
+    logger.info(f"Ux: {Ux}")
 
     ey = y - yd
     ev = v - yd_dot + cv*ey
     ey_dot = ev - cy*ey
     v_dot = -cv*ev - ey + yd_dot2 - cy*ey_dot
+    v_dot = 0   # for testing
     dy_hat_dot = lamy*ev
     dy_hat += dy_hat_dot*dt
     Uy = (v_dot - dy_hat)*m/U1
+    logger.info(f"Uy: {Uy}")
+
 
     # attitude control
+    logger.info(f"{Ux*math.sin(psi) - Uy*math.cos(psi)}")
     phid_new = math.asin(Ux*math.sin(psi) - Uy*math.cos(psi))
+    logger.info(f"{(Ux*math.cos(psi) + Uy*math.sin(psi))/math.cos(phid_new)}")
     thetad_new = math.asin((Ux*math.cos(psi) + Uy*math.sin(psi))/math.cos(phid_new))
 
     epsi = psi - psid
@@ -231,7 +239,15 @@ def adaptive_controller(pos, att, posd, attd, dhat, jifen, dt):
     dphi_hat += dphi_hat_dot*dt
     U2 = (phi_dot2 - dphi_hat - theta_dot*psi_dot*(Iyy-Izz)/Ixx)*Ixx
 
-    U3 = 0
+    ethata = theta - thetad_new
+    etheta_dot = theta_dot - thetad_dot
+    xtheta += ethata
+    alpha_theta = thetad_dot - cthe*ethata
+    beta_theta = theta_dot - alpha_theta + lamthe*xtheta
+    theta_dot2 = -cr*beta_theta + thetad_dot2 - cthe*etheta_dot - lamthe*ethata - ethata
+    dtheta_hat_dot = lamthe_star*beta_theta
+    dtheta_hat += dtheta_hat_dot*dt
+    U3 = (theta_dot2 - dtheta_hat - phi_dot*psi_dot*(Izz-Ixx)/Iyy)*Iyy
 
     dhat_old = [dx_hat, dy_hat, dz_hat, dphi_hat, dtheta_hat, dpsi_hat]
     jifen_old = [xphi, xtheta, xpsi]
