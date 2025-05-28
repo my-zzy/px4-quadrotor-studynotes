@@ -104,7 +104,7 @@ class OffboardControl(Node):
         self.psi_data = deque([0.0]*3, maxlen=3)
         self.phid_data = deque([0.0]*3, maxlen=3)
         self.thetad_data = deque([0.0]*3, maxlen=3)
-        self.psid_data = deque([0.0]*3, maxlen=3)
+        self.psid_data = deque([1.77]*3, maxlen=3)
         
         # self.psid_data.append(0)
         # self.psid_data.append(0)
@@ -119,6 +119,9 @@ class OffboardControl(Node):
         self.phi_draw = []
         self.the_draw = []
         self.psi_draw = []
+
+        self.phid_draw = []
+        self.thetad_draw = []
 
         self.u1_draw = []
         self.u2_draw = []
@@ -168,7 +171,7 @@ class OffboardControl(Node):
             self.arming_state == VehicleStatus.ARMING_STATE_ARMED):
 
             # follow this trajectory
-            xdxd, ydyd, zdzd, ppsid = test1(self.t)
+            xdxd, ydyd, zdzd, ppsid = circle(self.t)
             self.xd_data.append(xdxd)
             self.yd_data.append(ydyd)
             self.zd_data.append(zdzd)
@@ -190,6 +193,9 @@ class OffboardControl(Node):
             U1, U2, U3, U4, phid_old, thetad_old, x_dot2, y_dot2 = pd_controller(pos, att, posd, attd, self.dt, self.t)
             self.phid_data.append(phid_old)
             self.thetad_data.append(thetad_old)
+
+            self.phid_draw.append(phid_old)
+            self.thetad_draw.append(thetad_old)
 
             self.x_dot2_draw.append(x_dot2)
             self.y_dot2_draw.append(y_dot2)
@@ -254,7 +260,7 @@ class OffboardControl(Node):
 
                 # plt.subplot(6, 1, 5)
                 # plt.plot(list(range(len(self.z_draw))), self.z_draw)
-                # plt.plot(x := np.linspace(0, test_time, 10), -0.5*0.02*x)
+                # plt.plot(x := np.linspace(0, test_time, 10), -1*self.dt*x)
                 # plt.title('z over time')
                 # plt.subplot(6, 1, 6)
                 # plt.plot(list(range(len(self.u1_draw))), self.u1_draw)
@@ -262,25 +268,31 @@ class OffboardControl(Node):
                 # plt.tight_layout()
 
                 plt.figure()
-                # plt.subplot(6, 1, 1)
-                # plt.plot(list(range(len(self.x_dot2_draw))), self.x_dot2_draw)
-                # plt.title('x_dot2 over time')
-                # plt.subplot(6, 1, 2)
-                # plt.plot(list(range(len(self.y_dot2_draw))), self.y_dot2_draw)
-                # plt.title('y_dot2 over time')
                 plt.subplot(6, 1, 1)
-                plt.plot(list(range(len(self.u2_draw))), self.u2_draw)
-                plt.title('U2 over time')
+                plt.plot(list(range(len(self.x_draw))), self.x_draw)
+                plt.plot(x := np.linspace(0, test_time, 1000), 0.5*np.sin(0.5*self.dt*x))
+                # plt.plot(list(range(len(self.x_dot2_draw))), self.x_dot2_draw)
+                plt.title('x over time')
                 plt.subplot(6, 1, 2)
-                plt.plot(list(range(len(self.u3_draw))), self.u3_draw)
-                plt.title('U3 over time')
+                plt.plot(list(range(len(self.y_draw))), self.y_draw)
+                plt.plot(x := np.linspace(0, test_time, 1000), 0.5*np.cos(0.5*self.dt*x))
+                # plt.plot(list(range(len(self.y_dot2_draw))), self.y_dot2_draw)
+                plt.title('y over time')
+                # plt.subplot(6, 1, 1)
+                # plt.plot(list(range(len(self.u2_draw))), self.u2_draw)
+                # plt.title('U2 over time')
+                # plt.subplot(6, 1, 2)
+                # plt.plot(list(range(len(self.u3_draw))), self.u3_draw)
+                # plt.title('U3 over time')
                 plt.subplot(6, 1, 3)
                 plt.plot(list(range(len(self.phi_draw))), self.phi_draw)
-                plt.plot(x := np.linspace(0, test_time, 1000), 0.1*np.sin(self.dt*x))
+                plt.plot(list(range(len(self.phid_draw))), self.phid_draw)
+                # plt.plot(x := np.linspace(0, test_time, 1000), 0.1*np.sin(2*self.dt*x))
                 plt.title('Roll over time')
                 plt.subplot(6, 1, 4)
                 plt.plot(list(range(len(self.the_draw))), self.the_draw)
-                # plt.plot(x := np.linspace(0, test_time, 1000), 0.2*np.sin(self.dt*x))
+                plt.plot(list(range(len(self.thetad_draw))), self.thetad_draw)
+                # plt.plot(x := np.linspace(0, test_time, 1000), 0.2*np.sin(2*self.dt*x))
                 plt.title('Pitch over time')
                 plt.subplot(6, 1, 5)
                 plt.plot(list(range(len(self.psi_draw))), self.psi_draw)

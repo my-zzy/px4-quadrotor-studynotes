@@ -9,24 +9,24 @@ Izz = 0.4
 
 # pd parameters
 
-kp1 = 0.2
-kd1 = 1
+kp1 = 0.8
+kd1 = 0.2
 
-kp2 = 0.2
-kd2 = 0.1
+kp2 = 0.8
+kd2 = 0.2
 
 kp3 = 0.8
-kd3 = 0.1
+kd3 = 0.4
 
 
-kp4 = 20
-kd4 = 8
+kp4 = 50
+kd4 = 20
 
 kp5 = 20
-kd5 = 8
+kd5 = 15
 
-kp6 = 8
-kd6 = 8
+kp6 = 60
+kd6 = 30
 
 # adaptive paras
 cx = 7

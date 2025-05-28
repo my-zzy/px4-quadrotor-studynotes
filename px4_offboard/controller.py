@@ -65,8 +65,8 @@ def pd_controller(pos, att, posd, attd, dt, t):
     # x_dot2 = pd(x, x_dot, xd, xd_dot, kp1, kd1)
     # y_dot2 = pd(y, y_dot, yd, yd_dot, kp2, kd2)
     # z_dot2 = pd(z, z_dot, zd, zd_dot, kp3, kd3)
-    x_dot2 = pd(x[-1], x_dot, xd[-1], xd_dot, kp1, kd1)
-    y_dot2 = pd(y[-1], y_dot, yd[-1], yd_dot, kp2, kd2)
+    x_dot2 = -pd(x[-1], x_dot, xd[-1], xd_dot, kp1, kd1)
+    y_dot2 = -pd(y[-1], y_dot, yd[-1], yd_dot, kp2, kd2)
     z_dot2 = pd(z[-1], z_dot, zd[-1], zd_dot, kp3, kd3)
     print(1111111)
     # logger.info(f"{z[-1]}, {z_dot}, {zd[-1]}, {zd_dot}")
@@ -74,8 +74,8 @@ def pd_controller(pos, att, posd, attd, dt, t):
     # logger.info(f"x_dot2: {x_dot2}")
 
     # !!for testing only
-    x_dot2 = 0
-    y_dot2 = 0
+    # x_dot2 = 0
+    # y_dot2 = 0
 
     # Note that U1 may be negative
     if z_dot2+g > 0:
@@ -96,19 +96,20 @@ def pd_controller(pos, att, posd, attd, dt, t):
         phidd = -math.asin(math.sqrt(tem))
 
     tem = (z_dot2+g)**2/((x_dot2*math.cos(psi)+y_dot2*math.sin(psi))**2+(z_dot2+g)**2)
-    # if x_dot2*math.cos(psi)+y_dot2*math.sin(psi) > 0:
-    if m*x_dot2/U1 - math.sin(phi[-1])*math.sin(psi) > 0:
+    if x_dot2*math.cos(psi)+y_dot2*math.sin(psi) > 0:
+    # if m*x_dot2/U1 - math.sin(phi[-1])*math.sin(psi) > 0:
         thetadd = math.acos(math.sqrt(tem))
     else:
         thetadd = -math.acos(math.sqrt(tem))
 
     # !!for testing only
-    phidd = 0
-    thetadd = 0
-    if t > 2:
-        phidd = 0.2
-        # phidd = 0.1*math.sin(t)
-        # thetadd = 0.2*math.sin(t)
+    # phidd = 0
+    # thetadd = 0
+    # if t > 2:
+    #     # phidd = 0.2
+    #     # thetadd = 0.2
+    #     phidd = 0.1*math.sin(2*t)
+    #     thetadd = 0.2*math.sin(2*t)
     
 
 
