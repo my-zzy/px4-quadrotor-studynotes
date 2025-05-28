@@ -268,6 +268,8 @@ Adaptive Backstepping-Based Trajectory Tracking Control for Quadrotor UAV with U
 
    * Frame conventions https://docs.px4.io/main/en/ros2/user_guide.html#ros-2-px4-frame-conventions
 
+   * PID tuning guide https://docs.px4.io/main/en/config_mc/pid_tuning_guide_multicopter.html
+
 ```
     <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
       <jointName>rotor_0_joint</jointName>
