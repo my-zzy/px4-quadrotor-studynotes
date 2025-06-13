@@ -199,7 +199,7 @@ def adaptive_controller(pos, att, posd, attd, dhat, jifen, dt):
     u_dot = 0   # for testing
     dx_hat_dot = lamx*eu
     dx_hat += dx_hat_dot*dt
-    Ux = (u_dot - dx_hat +g)*m/U1
+    Ux = (u_dot - dx_hat)*m/U1
     logger.info(f"Ux: {Ux}")
 
     ey = y - yd
@@ -227,7 +227,7 @@ def adaptive_controller(pos, att, posd, attd, dhat, jifen, dt):
     psi_dot2 = -cr*beta_psi + psid_dot2 - cpsi*epsi_dot - lampsi*epsi - epsi
     dpsi_hat_dot = lampsi_star*beta_psi
     dpsi_hat += dpsi_hat_dot*dt
-    U4 = (psi_dot2 - dpsi_hat - theta_dot*phi_dot*(Ixx-Iyy)/Izz)*Izz
+    U4 = (psi_dot2 - dpsi_hat - theta_dot*phi_dot*(Ixx-Iyy)/Izz)*Izz/l
 
     ephi = phi - phid_new
     ephi_dot = phi_dot - phid_dot
@@ -237,7 +237,7 @@ def adaptive_controller(pos, att, posd, attd, dhat, jifen, dt):
     phi_dot2 = -cr*beta_phi + phid_dot2 - cphi*ephi_dot - lamphi*ephi - ephi
     dphi_hat_dot = lamphi_star*beta_phi
     dphi_hat += dphi_hat_dot*dt
-    U2 = (phi_dot2 - dphi_hat - theta_dot*psi_dot*(Iyy-Izz)/Ixx)*Ixx
+    U2 = (phi_dot2 - dphi_hat - theta_dot*psi_dot*(Iyy-Izz)/Ixx)*Ixx/l
 
     ethata = theta - thetad_new
     etheta_dot = theta_dot - thetad_dot
@@ -247,7 +247,7 @@ def adaptive_controller(pos, att, posd, attd, dhat, jifen, dt):
     theta_dot2 = -cr*beta_theta + thetad_dot2 - cthe*etheta_dot - lamthe*ethata - ethata
     dtheta_hat_dot = lamthe_star*beta_theta
     dtheta_hat += dtheta_hat_dot*dt
-    U3 = (theta_dot2 - dtheta_hat - phi_dot*psi_dot*(Izz-Ixx)/Iyy)*Iyy
+    U3 = (theta_dot2 - dtheta_hat - phi_dot*psi_dot*(Izz-Ixx)/Iyy)*Iyy/l
 
     dhat_old = [dx_hat, dy_hat, dz_hat, dphi_hat, dtheta_hat, dpsi_hat]
     jifen_old = [xphi, xtheta, xpsi]

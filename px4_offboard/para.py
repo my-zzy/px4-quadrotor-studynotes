@@ -29,15 +29,15 @@ kp6 = 60
 kd6 = 30
 
 # adaptive paras
-cx = 7
-cy = 7
-cz = 7
-cu = 1.38
-cv = 1.38
-cw = 1.38
-lamx = 20.6
-lamy = 20.6
-lamz = 20.6
+cx = 1
+cy = 1
+cz = 1
+cu = 1
+cv = 1
+cw = 1
+lamx = 2
+lamy = 2
+lamz = 2
 
 lamphi = 0.1
 lamthe = 0.1
