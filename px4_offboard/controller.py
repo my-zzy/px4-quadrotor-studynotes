@@ -196,21 +196,26 @@ def adaptive_controller(pos, att, posd, attd, dhat, jifen, dt):
     eu = u - xd_dot + cu*ex
     ex_dot = eu - cx*ex
     u_dot = -cu*eu - ex + xd_dot2 - cx*ex_dot
-    u_dot = 0   # for testing
+    # u_dot = 0   # for testing
     dx_hat_dot = lamx*eu
     dx_hat += dx_hat_dot*dt
     Ux = (u_dot - dx_hat)*m/U1
     logger.info(f"Ux: {Ux}")
+    logger.info(f"dx_hat: {dx_hat}, u_dot: {u_dot}")
 
     ey = y - yd
     ev = v - yd_dot + cv*ey
     ey_dot = ev - cy*ey
     v_dot = -cv*ev - ey + yd_dot2 - cy*ey_dot
-    v_dot = 0   # for testing
+    # v_dot = 0   # for testing
     dy_hat_dot = lamy*ev
     dy_hat += dy_hat_dot*dt
     Uy = (v_dot - dy_hat)*m/U1
     logger.info(f"Uy: {Uy}")
+
+    # for testing only
+    Ux = 0
+    Uy = 0
 
 
     # attitude control
