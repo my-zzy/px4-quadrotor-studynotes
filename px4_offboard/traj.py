@@ -27,3 +27,6 @@ def test2(t):
     
 def test3(t):
     return 0.1*t, 0.2*t, -t, 1.77
+
+def test4(t):
+    return 0, 0, -t, 1.77+0.1*math.sin(0.5*t)

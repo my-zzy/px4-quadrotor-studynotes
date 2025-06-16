@@ -23,7 +23,8 @@ MicroXRCEAgent udp4 -p 8888
 cd PX4-Autopilot && make px4_sitl gz_x500
 ./QGroundControl-x86_64.AppImage
 cd px4_ros_com_ws && source install/setup.bash
-ros2 launch px4_offboard offboard_position_control.launch.py
+colcon build && ros2 launch px4_offboard offboard_position_control.launch.py
+QGC: offboard & arm
 ```
 
 ## Install PX4 Offboard and dependencies

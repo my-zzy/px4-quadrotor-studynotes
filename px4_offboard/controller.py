@@ -200,8 +200,8 @@ def adaptive_controller(pos, att, posd, attd, dhat, jifen, dt):
     dx_hat_dot = lamx*eu
     dx_hat += dx_hat_dot*dt
     Ux = (u_dot - dx_hat)*m/U1
-    logger.info(f"Ux: {Ux}")
-    logger.info(f"dx_hat: {dx_hat}, u_dot: {u_dot}")
+    # logger.info(f"Ux: {Ux}")
+    # logger.info(f"dx_hat: {dx_hat}, u_dot: {u_dot}")
 
     ey = y - yd
     ev = v - yd_dot + cv*ey
@@ -211,7 +211,7 @@ def adaptive_controller(pos, att, posd, attd, dhat, jifen, dt):
     dy_hat_dot = lamy*ev
     dy_hat += dy_hat_dot*dt
     Uy = (v_dot - dy_hat)*m/U1
-    logger.info(f"Uy: {Uy}")
+    # logger.info(f"Uy: {Uy}")
 
     # for testing only
     Ux = 0
@@ -225,7 +225,9 @@ def adaptive_controller(pos, att, posd, attd, dhat, jifen, dt):
     thetad_new = math.asin((Ux*math.cos(psi) + Uy*math.sin(psi))/math.cos(phid_new))
 
     epsi = psi - psid
+    logger.info(f"psid: {round(psid, 4)}, psi: {round(psi, 4)}, epsi: {round(epsi, 4)}")
     epsi_dot = psi_dot - psid_dot
+    logger.info(f"psid_dot: {round(psid_dot, 4)}, epsi_dot: {round(epsi_dot, 4)}")
     xpsi += epsi    # TODO:initialize xpsi
     alpha_psi = psid_dot - cpsi*epsi
     beta_psi = psi_dot - alpha_psi + lampsi*xpsi
@@ -233,23 +235,28 @@ def adaptive_controller(pos, att, posd, attd, dhat, jifen, dt):
     dpsi_hat_dot = lampsi_star*beta_psi
     dpsi_hat += dpsi_hat_dot*dt
     U4 = (psi_dot2 - dpsi_hat - theta_dot*phi_dot*(Ixx-Iyy)/Izz)*Izz/l
+    logger.info(f"U4: {round(U4, 4)}")
+    logger.info(f"dpsi_hat: {round(dpsi_hat, 4)}, phi_dot2: {round(psi_dot2, 4)}")
 
     ephi = phi - phid_new
     ephi_dot = phi_dot - phid_dot
     xphi += ephi
     alpha_phi = phid_dot - cphi*ephi
     beta_phi = phi_dot - alpha_phi + lamphi*xphi
-    phi_dot2 = -cr*beta_phi + phid_dot2 - cphi*ephi_dot - lamphi*ephi - ephi
+    phi_dot2 = -cp*beta_phi + phid_dot2 - cphi*ephi_dot - lamphi*ephi - ephi
     dphi_hat_dot = lamphi_star*beta_phi
     dphi_hat += dphi_hat_dot*dt
     U2 = (phi_dot2 - dphi_hat - theta_dot*psi_dot*(Iyy-Izz)/Ixx)*Ixx/l
+    logger.info(f"U2: {round(U2, 4)}")
+    logger.info(f"dphi_hat: {round(dphi_hat, 4)}, phi_dot2: {round(phi_dot2, 4)}")
+    
 
     ethata = theta - thetad_new
     etheta_dot = theta_dot - thetad_dot
     xtheta += ethata
     alpha_theta = thetad_dot - cthe*ethata
     beta_theta = theta_dot - alpha_theta + lamthe*xtheta
-    theta_dot2 = -cr*beta_theta + thetad_dot2 - cthe*etheta_dot - lamthe*ethata - ethata
+    theta_dot2 = -cq*beta_theta + thetad_dot2 - cthe*etheta_dot - lamthe*ethata - ethata
     dtheta_hat_dot = lamthe_star*beta_theta
     dtheta_hat += dtheta_hat_dot*dt
     U3 = (theta_dot2 - dtheta_hat - phi_dot*psi_dot*(Izz-Ixx)/Iyy)*Iyy/l
