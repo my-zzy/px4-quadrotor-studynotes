@@ -198,7 +198,7 @@ class OffboardControl(Node):
 
             # --- Torque ---
             max_torque = 8.54858*0.174*2
-            max_psi_torque = 400
+            max_psi_torque = 500
             torque_msg = VehicleTorqueSetpoint()
             torque_msg.timestamp = now
             torque_msg.xyz[0] = mapp(U2/max_torque)  # Roll torque
