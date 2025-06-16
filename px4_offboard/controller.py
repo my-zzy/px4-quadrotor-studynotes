@@ -136,7 +136,7 @@ def pd_controller(pos, att, posd, attd, dt, t):
     # To calculate phid_dot & thetad_dot
 
 
-def adaptive_controller(pos, att, posd, attd, dhat, jifen, dt):
+def adaptive_controller(pos, att, posd, attd, dhat, jifen, dt, t):
     x = pos[0][-1]
     y = pos[1][-1]
     z = pos[2][-1]
@@ -200,7 +200,7 @@ def adaptive_controller(pos, att, posd, attd, dhat, jifen, dt):
     dx_hat_dot = lamx*eu
     dx_hat += dx_hat_dot*dt
     Ux = (u_dot - dx_hat)*m/U1
-    # logger.info(f"Ux: {Ux}")
+    logger.info(f"Ux: {Ux}")
     # logger.info(f"dx_hat: {dx_hat}, u_dot: {u_dot}")
 
     ey = y - yd
@@ -211,11 +211,12 @@ def adaptive_controller(pos, att, posd, attd, dhat, jifen, dt):
     dy_hat_dot = lamy*ev
     dy_hat += dy_hat_dot*dt
     Uy = (v_dot - dy_hat)*m/U1
-    # logger.info(f"Uy: {Uy}")
+    logger.info(f"Uy: {Uy}")
 
     # for testing only
-    Ux = 0
-    Uy = 0
+    if t < 50000*dt:
+        Ux = 0
+        Uy = 0
 
 
     # attitude control
@@ -224,10 +225,14 @@ def adaptive_controller(pos, att, posd, attd, dhat, jifen, dt):
     logger.info(f"{(Ux*math.cos(psi) + Uy*math.sin(psi))/math.cos(phid_new)}")
     thetad_new = math.asin((Ux*math.cos(psi) + Uy*math.sin(psi))/math.cos(phid_new))
 
+    if t > 500*dt:
+        phid_new = 0.1
+        thetad_new = 0.2
+
     epsi = psi - psid
-    logger.info(f"psid: {round(psid, 4)}, psi: {round(psi, 4)}, epsi: {round(epsi, 4)}")
+    # logger.info(f"psid: {round(psid, 4)}, psi: {round(psi, 4)}, epsi: {round(epsi, 4)}")
     epsi_dot = psi_dot - psid_dot
-    logger.info(f"psid_dot: {round(psid_dot, 4)}, epsi_dot: {round(epsi_dot, 4)}")
+    # logger.info(f"psid_dot: {round(psid_dot, 4)}, epsi_dot: {round(epsi_dot, 4)}")
     xpsi += epsi    # TODO:initialize xpsi
     alpha_psi = psid_dot - cpsi*epsi
     beta_psi = psi_dot - alpha_psi + lampsi*xpsi
@@ -235,8 +240,8 @@ def adaptive_controller(pos, att, posd, attd, dhat, jifen, dt):
     dpsi_hat_dot = lampsi_star*beta_psi
     dpsi_hat += dpsi_hat_dot*dt
     U4 = (psi_dot2 - dpsi_hat - theta_dot*phi_dot*(Ixx-Iyy)/Izz)*Izz/l
-    logger.info(f"U4: {round(U4, 4)}")
-    logger.info(f"dpsi_hat: {round(dpsi_hat, 4)}, phi_dot2: {round(psi_dot2, 4)}")
+    # logger.info(f"U4: {round(U4, 4)}")
+    # logger.info(f"dpsi_hat: {round(dpsi_hat, 4)}, phi_dot2: {round(psi_dot2, 4)}")
 
     ephi = phi - phid_new
     ephi_dot = phi_dot - phid_dot
@@ -247,8 +252,8 @@ def adaptive_controller(pos, att, posd, attd, dhat, jifen, dt):
     dphi_hat_dot = lamphi_star*beta_phi
     dphi_hat += dphi_hat_dot*dt
     U2 = (phi_dot2 - dphi_hat - theta_dot*psi_dot*(Iyy-Izz)/Ixx)*Ixx/l
-    logger.info(f"U2: {round(U2, 4)}")
-    logger.info(f"dphi_hat: {round(dphi_hat, 4)}, phi_dot2: {round(phi_dot2, 4)}")
+    # logger.info(f"U2: {round(U2, 4)}")
+    # logger.info(f"dphi_hat: {round(dphi_hat, 4)}, phi_dot2: {round(phi_dot2, 4)}")
     
 
     ethata = theta - thetad_new
@@ -264,4 +269,4 @@ def adaptive_controller(pos, att, posd, attd, dhat, jifen, dt):
     dhat_old = [dx_hat, dy_hat, dz_hat, dphi_hat, dtheta_hat, dpsi_hat]
     jifen_old = [xphi, xtheta, xpsi]
 
-    return U1, U2, U3, U4, phid_new, thetad_new, dhat_old, jifen_old
+    return U1, U2, U3, U4, phid_new, thetad_new, dhat_old, jifen_old, Ux, Uy
