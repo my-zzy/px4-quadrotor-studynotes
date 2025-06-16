@@ -269,4 +269,8 @@ def adaptive_controller(pos, att, posd, attd, dhat, jifen, dt, t):
     dhat_old = [dx_hat, dy_hat, dz_hat, dphi_hat, dtheta_hat, dpsi_hat]
     jifen_old = [xphi, xtheta, xpsi]
 
+    # if t < 100*dt:
+    #     U2 = 0
+    #     U3 = 0
+
     return U1, U2, U3, U4, phid_new, thetad_new, dhat_old, jifen_old, Ux, Uy
